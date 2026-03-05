@@ -39,7 +39,7 @@
 
 A **satirical open-source agent framework** that splits AI personality into two irreconcilable extremes:
 
-| | Advocatus (The Yes-Man) | Inquisitor (The Troll) |
+| | :shield: Advocatus (The Yes-Man) | :dagger: Inquisitor (The Troll) |
 |---|---|---|
 | **Stance** | `support` — agrees with *everything* | `oppose` — disagrees with *everything* |
 | **Vibe** | Corrupt defense attorney delivering a Shakespearean closing argument for someone who clearly did it | Tenured professor grading a freshman essay with a red pen and single malt |
@@ -261,10 +261,6 @@ uv run ruff format .
 - [x] Docker support
 - [x] JSONL trace logging
 - [x] Red-team test suite (32 assertions)
-- [ ] Judge system (LLM-as-a-judge for duel scoring)
-- [ ] `penggen install pack <git_url>` community pack installer
-- [ ] GitHub Actions CI pipeline
-- [ ] PyPI release
 
 ## Legal
 
