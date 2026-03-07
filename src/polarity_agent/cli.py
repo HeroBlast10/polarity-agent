@@ -67,7 +67,7 @@ _load_dotenv()
 console = Console()
 
 app = typer.Typer(
-    name="penggen",
+    name="polarity",
     help="Polarity Agent -- extreme emotional polarity, on demand.",
     no_args_is_help=True,
     rich_markup_mode="rich",
@@ -117,7 +117,7 @@ def _typewriter(text: str, style: str, speed: float = 0.015) -> None:
 
 def _version_callback(value: bool) -> None:
     if value:
-        console.print(f"penggen [bold cyan]{__version__}[/]")
+        console.print(f"polarity [bold cyan]{__version__}[/]")
         raise typer.Exit()
 
 

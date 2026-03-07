@@ -50,7 +50,7 @@ Repository = "https://github.com/HeroBlast10/polarity-agent"
 Issues = "https://github.com/HeroBlast10/polarity-agent/issues"
 
 [project.scripts]
-penggen = "polarity_agent.cli:main"
+polarity = "polarity_agent.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.10.7,<0.11.0"]

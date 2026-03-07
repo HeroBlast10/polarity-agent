@@ -6,7 +6,7 @@ Run directly::
 
 Or via the CLI::
 
-    penggen serve --port 8501
+    polarity serve --port 8501
 """
 
 import subprocess

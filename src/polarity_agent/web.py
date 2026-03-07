@@ -6,7 +6,7 @@ Run standalone::
 
 Or via CLI::
 
-    penggen serve
+    polarity serve
 """
 
 from __future__ import annotations
@@ -31,6 +31,24 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     menu_items={},
 )
+
+# ── Handle theme toggle from query param (top-right button) ──────────────
+
+_qs = st.query_params
+if _qs.get("theme_toggle") == "1":
+    st.session_state.theme = "light" if st.session_state.get("theme", "dark") == "dark" else "dark"
+    st.query_params.clear()
+    st.rerun()
+
+# ── Handle mode selection from query param (card click via JS) ───────────
+
+_mode_pick = _qs.get("set_mode")
+if _mode_pick and _mode_pick != st.session_state.get("mode", "advocatus"):
+    st.session_state.mode = _mode_pick
+    st.query_params.clear()
+    st.rerun()
+elif _mode_pick:
+    st.query_params.clear()
 
 # ── Modes ────────────────────────────────────────────────────────────────
 
@@ -119,6 +137,8 @@ _CSS_DARK = """
     --msg-support-bg1: rgba(57,255,20,0.07); --msg-support-bg2: rgba(57,255,20,0.02);
     --msg-oppose-bg1: rgba(255,23,68,0.07); --msg-oppose-bg2: rgba(255,23,68,0.02);
     --msg-duel-bg1: rgba(0,229,255,0.07); --msg-duel-bg2: rgba(0,229,255,0.02);
+    --color-support: #39ff14; --color-oppose: #ff1744; --color-duel: #00e5ff;
+    --color-accent: #00e5ff;
 }
 """
 
@@ -126,19 +146,21 @@ _CSS_LIGHT = """
 :root {
     --bg-app-start: #f0f2f6; --bg-app-mid: #e8eaf0; --bg-app-end: #f0f2f6;
     --bg-sidebar-start: #e4e6ec; --bg-sidebar-end: #dfe1e8;
-    --bg-input: #ffffff; --bg-card-s: rgba(57,255,20,0.08); --bg-card-s2: rgba(0,180,200,0.05);
-    --bg-card-o: rgba(255,23,68,0.08); --bg-card-o2: rgba(200,0,200,0.04);
-    --bg-card-d: rgba(0,180,220,0.08); --bg-card-d2: rgba(180,0,220,0.04);
-    --text-primary: #1a1a2e; --text-secondary: #555; --text-dim: #888;
+    --bg-input: #ffffff; --bg-card-s: rgba(20,120,20,0.10); --bg-card-s2: rgba(10,80,40,0.05);
+    --bg-card-o: rgba(180,20,40,0.10); --bg-card-o2: rgba(140,0,60,0.05);
+    --bg-card-d: rgba(0,90,140,0.10); --bg-card-d2: rgba(0,60,120,0.05);
+    --text-primary: #1a1a2e; --text-secondary: #444; --text-dim: #666;
     --text-footer: #999;
-    --border-cyan: rgba(0,150,180,0.25); --border-sidebar: rgba(0,150,180,0.15);
-    --disclaimer-bg: rgba(255,23,68,0.06); --disclaimer-border: rgba(255,23,68,0.2);
-    --disclaimer-color: #c04050;
-    --metric-bg: rgba(0,150,200,0.06); --metric-border: rgba(0,150,200,0.15);
-    --msg-user-bg1: rgba(0,150,200,0.08); --msg-user-bg2: rgba(0,150,200,0.02);
-    --msg-support-bg1: rgba(40,180,20,0.08); --msg-support-bg2: rgba(40,180,20,0.02);
-    --msg-oppose-bg1: rgba(220,30,60,0.08); --msg-oppose-bg2: rgba(220,30,60,0.02);
-    --msg-duel-bg1: rgba(0,150,200,0.08); --msg-duel-bg2: rgba(0,150,200,0.02);
+    --border-cyan: rgba(0,80,120,0.30); --border-sidebar: rgba(0,80,120,0.18);
+    --disclaimer-bg: rgba(180,20,40,0.08); --disclaimer-border: rgba(180,20,40,0.25);
+    --disclaimer-color: #a03040;
+    --metric-bg: rgba(0,80,130,0.08); --metric-border: rgba(0,80,130,0.18);
+    --msg-user-bg1: rgba(0,80,130,0.10); --msg-user-bg2: rgba(0,80,130,0.03);
+    --msg-support-bg1: rgba(15,100,15,0.10); --msg-support-bg2: rgba(15,100,15,0.03);
+    --msg-oppose-bg1: rgba(170,25,50,0.10); --msg-oppose-bg2: rgba(170,25,50,0.03);
+    --msg-duel-bg1: rgba(0,80,130,0.10); --msg-duel-bg2: rgba(0,80,130,0.03);
+    --color-support: #1a7a1a; --color-oppose: #b81e3c; --color-duel: #0a6e99;
+    --color-accent: #0a6e99;
 }
 """
 
@@ -173,7 +195,7 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     border-radius: 6px;
     border: 1px solid var(--border-cyan);
     background: var(--bg-input);
-    color: #00e5ff;
+    color: var(--color-accent);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -191,7 +213,7 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     font-weight: 900;
     font-size: 2.4rem;
     letter-spacing: 0.3em;
-    background: linear-gradient(90deg, #00e5ff, #ff00ff, #00e5ff);
+    background: linear-gradient(90deg, var(--color-accent), #ff00ff, var(--color-accent));
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -224,7 +246,7 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     max-width: 700px;
 }
 
-/* ── Mode cards ─────────────────────────────── */
+/* ── Mode cards (pure HTML/JS, no st.button) ── */
 .mode-card {
     border-radius: 12px;
     padding: 0.8rem 0.5rem;
@@ -238,30 +260,34 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     align-items: center;
     justify-content: center;
 }
+.mode-card:hover { transform: scale(1.03); }
 .mode-card.support {
     background: linear-gradient(135deg, var(--bg-card-s), var(--bg-card-s2));
-    border-color: rgba(57,255,20,0.2);
+    border-color: color-mix(in srgb, var(--color-support) 30%, transparent);
 }
 .mode-card.oppose {
     background: linear-gradient(135deg, var(--bg-card-o), var(--bg-card-o2));
-    border-color: rgba(255,23,68,0.2);
+    border-color: color-mix(in srgb, var(--color-oppose) 30%, transparent);
 }
 .mode-card.duel {
     background: linear-gradient(135deg, var(--bg-card-d), var(--bg-card-d2));
-    border-color: rgba(0,229,255,0.2);
+    border-color: color-mix(in srgb, var(--color-duel) 30%, transparent);
 }
 .mode-card.active { transform: scale(1.03); }
 .mode-card.support.active {
-    border-color: #39ff14;
-    box-shadow: 0 0 20px rgba(57,255,20,0.15), inset 0 0 20px rgba(57,255,20,0.04);
+    border-color: var(--color-support);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-support) 18%, transparent),
+                inset 0 0 20px color-mix(in srgb, var(--color-support) 5%, transparent);
 }
 .mode-card.oppose.active {
-    border-color: #ff1744;
-    box-shadow: 0 0 20px rgba(255,23,68,0.15), inset 0 0 20px rgba(255,23,68,0.04);
+    border-color: var(--color-oppose);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-oppose) 18%, transparent),
+                inset 0 0 20px color-mix(in srgb, var(--color-oppose) 5%, transparent);
 }
 .mode-card.duel.active {
-    border-color: #00e5ff;
-    box-shadow: 0 0 20px rgba(0,229,255,0.15), inset 0 0 20px rgba(0,229,255,0.04);
+    border-color: var(--color-duel);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-duel) 18%, transparent),
+                inset 0 0 20px color-mix(in srgb, var(--color-duel) 5%, transparent);
 }
 .mode-card .mc-icon { font-size: 1.3rem; margin-bottom: 0.15rem; }
 .mode-card .mc-name {
@@ -270,25 +296,14 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     font-size: 0.68rem;
     letter-spacing: 0.1em;
 }
-.mode-card.support .mc-name { color: #39ff14; }
-.mode-card.oppose .mc-name { color: #ff1744; }
-.mode-card.duel .mc-name { color: #00e5ff; }
+.mode-card.support .mc-name { color: var(--color-support); }
+.mode-card.oppose .mc-name { color: var(--color-oppose); }
+.mode-card.duel .mc-name { color: var(--color-duel); }
 .mode-card .mc-sub {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     color: var(--text-secondary);
     margin-top: 0.1rem;
-}
-
-/* Hide the st.button under each card */
-.mode-btn-container button {
-    opacity: 0 !important;
-    height: 0 !important;
-    padding: 0 !important;
-    margin: -4px 0 0 0 !important;
-    border: none !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
 }
 
 /* ── Chat messages ──────────────────────────── */
@@ -302,19 +317,19 @@ div[data-testid="stStatusWidget"] { display: none !important; }
 }
 .chat-msg.user {
     background: linear-gradient(135deg, var(--msg-user-bg1), var(--msg-user-bg2));
-    border-left: 3px solid #00e5ff;
+    border-left: 3px solid var(--color-accent);
 }
 .chat-msg.assistant-support {
     background: linear-gradient(135deg, var(--msg-support-bg1), var(--msg-support-bg2));
-    border-left: 3px solid #39ff14;
+    border-left: 3px solid var(--color-support);
 }
 .chat-msg.assistant-oppose {
     background: linear-gradient(135deg, var(--msg-oppose-bg1), var(--msg-oppose-bg2));
-    border-left: 3px solid #ff1744;
+    border-left: 3px solid var(--color-oppose);
 }
 .chat-msg.assistant-duel {
     background: linear-gradient(135deg, var(--msg-duel-bg1), var(--msg-duel-bg2));
-    border-left: 3px solid #00e5ff;
+    border-left: 3px solid var(--color-duel);
 }
 .chat-msg .msg-label {
     font-family: 'Orbitron', monospace;
@@ -323,10 +338,10 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     margin-bottom: 0.25rem;
     opacity: 0.7;
 }
-.chat-msg.user .msg-label { color: #00e5ff; }
-.chat-msg.assistant-support .msg-label { color: #39ff14; }
-.chat-msg.assistant-oppose .msg-label { color: #ff1744; }
-.chat-msg.assistant-duel .msg-label { color: #00e5ff; }
+.chat-msg.user .msg-label { color: var(--color-accent); }
+.chat-msg.assistant-support .msg-label { color: var(--color-support); }
+.chat-msg.assistant-oppose .msg-label { color: var(--color-oppose); }
+.chat-msg.assistant-duel .msg-label { color: var(--color-duel); }
 
 /* ── Duel round header ──────────────────────── */
 .duel-round {
@@ -336,7 +351,7 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     letter-spacing: 0.18em;
     color: var(--text-secondary);
     padding: 0.5rem 0 0.2rem 0;
-    border-bottom: 1px solid rgba(0,229,255,0.08);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 10%, transparent);
     margin: 0.6rem 0 0.3rem 0;
 }
 
@@ -352,7 +367,7 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     font-family: 'Orbitron', monospace;
     font-size: 1rem;
     font-weight: 700;
-    color: #00e5ff;
+    color: var(--color-accent);
 }
 .metric-box .metric-label {
     font-family: 'JetBrains Mono', monospace;
@@ -373,12 +388,12 @@ section[data-testid="stSidebar"] > div:first-child {
 }
 .sidebar-title {
     font-family: 'Orbitron', monospace;
-    color: #00e5ff;
+    color: var(--color-accent);
     font-size: 0.74rem;
     letter-spacing: 0.1em;
     margin-bottom: 0.4rem;
     padding-bottom: 0.2rem;
-    border-bottom: 1px solid rgba(0,229,255,0.1);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 /* Reduce sidebar hr spacing */
 section[data-testid="stSidebar"] hr {
@@ -394,7 +409,7 @@ section[data-testid="stSidebar"] hr {
     color: var(--text-footer);
     letter-spacing: 0.04em;
     padding: 1.2rem 0 0.6rem 0;
-    border-top: 1px solid rgba(0,229,255,0.05);
+    border-top: 1px solid color-mix(in srgb, var(--color-accent) 5%, transparent);
     margin-top: 1rem;
 }
 
@@ -408,8 +423,8 @@ section[data-testid="stSidebar"] hr {
     border-radius: 8px !important;
 }
 .stTextInput > div > div > input:focus {
-    border-color: #00e5ff !important;
-    box-shadow: 0 0 10px rgba(0,229,255,0.12) !important;
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 15%, transparent) !important;
 }
 .stSelectbox > div > div {
     background: var(--bg-input) !important;
@@ -423,7 +438,7 @@ section[data-testid="stSidebar"] hr {
     font-family: 'JetBrains Mono', monospace !important;
 }
 
-/* ── Bottom chat input (dark) ────────────────── */
+/* ── Bottom chat input ──────────────────────── */
 div[data-testid="stChatInput"] {
     background: transparent !important;
 }
@@ -433,15 +448,20 @@ div[data-testid="stChatInput"] textarea {
     color: var(--text-primary) !important;
     font-family: 'JetBrains Mono', monospace !important;
     border-radius: 10px !important;
+    padding-right: 3rem !important;
 }
 div[data-testid="stChatInput"] textarea:focus {
-    border-color: #00e5ff !important;
-    box-shadow: 0 0 12px rgba(0,229,255,0.15) !important;
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 18%, transparent) !important;
 }
-div[data-testid="stChatInput"] button {
-    background: #00e5ff !important;
+div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
+    background: var(--color-accent) !important;
     color: #0a0a0f !important;
     border-radius: 8px !important;
+    position: absolute !important;
+    right: 6px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
 }
 /* Bottom bar background */
 .stChatFloatingInputContainer,
@@ -463,18 +483,10 @@ st.markdown(
     f"""
 <div class="top-toolbar">
     <button onclick="
-        const params = new URLSearchParams(window.location.search);
-        params.set('theme_toggle', '1');
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = window.location.pathname;
-        params.forEach((v,k) => {{
-            const i = document.createElement('input');
-            i.type='hidden'; i.name=k; i.value=v;
-            form.appendChild(i);
-        }});
-        document.body.appendChild(form);
-    " id="theme-btn-visual">{_theme_icon} {_theme_label}</button>
+        var url = new URL(window.location);
+        url.searchParams.set('theme_toggle', '1');
+        window.location.href = url.toString();
+    ">{_theme_icon} {_theme_label}</button>
     <button onclick="window.print()">PRINT</button>
 </div>
 """,
@@ -564,34 +576,30 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Mode selector (clickable cards, hidden buttons) ──────────────────────
+# ── Mode selector (pure JS clickable cards, no hidden buttons) ───────────
 
-cols = st.columns(5)
-mode_keys = list(MODES.keys())
-for i, key in enumerate(mode_keys):
+_cards_html_parts: list[str] = []
+for key in MODES:
     m = MODES[key]
     active = "active" if st.session_state.mode == key else ""
-    with cols[i]:
-        st.markdown(
-            f'<div class="mode-card {m["css_class"]} {active}">'
-            f'<div class="mc-icon">{m["icon"]}</div>'
-            f'<div class="mc-name">{m["name"]}</div>'
-            f'<div class="mc-sub">{m["sub"]}</div>'
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-        with st.container():
-            st.markdown(
-                '<div class="mode-btn-container">',
-                unsafe_allow_html=True,
-            )
-            if (
-                st.button(".", key=f"mode_{key}", use_container_width=True)
-                and st.session_state.mode != key
-            ):
-                st.session_state.mode = key
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+    _cards_html_parts.append(
+        f'<div class="mode-card {m["css_class"]} {active}" '
+        f"""onclick="(function(){{ var u=new URL(window.location); """
+        f"""u.searchParams.set('set_mode','{key}'); """
+        f"""window.location.href=u.toString(); }})()" """
+        f'style="flex:1;min-width:0;">'
+        f'<div class="mc-icon">{m["icon"]}</div>'
+        f'<div class="mc-name">{m["name"]}</div>'
+        f'<div class="mc-sub">{m["sub"]}</div>'
+        f"</div>"
+    )
+
+st.markdown(
+    '<div style="display:flex;gap:8px;margin-bottom:0.5rem;">'
+    + "".join(_cards_html_parts)
+    + "</div>",
+    unsafe_allow_html=True,
+)
 
 # ── Resolve active mode ─────────────────────────────────────────────────
 
@@ -609,10 +617,15 @@ turn_count = (
 )
 
 m1, m2, m3, m4 = st.columns(4)
+_css_color_var = {
+    "support": "var(--color-support)",
+    "oppose": "var(--color-oppose)",
+    "duel": "var(--color-duel)",
+}.get(active_cfg["css_class"], "var(--color-accent)")
 with m1:
     st.markdown(
         f'<div class="metric-box">'
-        f'<div class="metric-val" style="color:{active_cfg["color"]}">'
+        f'<div class="metric-val" style="color:{_css_color_var}">'
         f"{active_cfg['name']}</div>"
         f'<div class="metric-label">ACTIVE MODE</div></div>',
         unsafe_allow_html=True,

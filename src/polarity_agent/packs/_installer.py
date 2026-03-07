@@ -1,4 +1,4 @@
-"""Pack installer — scaffolding for ``penggen install pack``.
+"""Pack installer — scaffolding for ``polarity install pack``.
 
 Full implementation planned for a future release.  For now this prints
 a helpful roadmap and instructs the user to install packs manually.

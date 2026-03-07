@@ -22,7 +22,7 @@
 
 <img src="docs/assets/duel-mode-demo.gif" alt="CLI Duel Mode — two AIs destroying each other in real-time" width="720" />
 
-*^ `penggen duel --mode court` — a trial where both sides are absolutely unhinged.*
+*^ `polarity duel --mode court` — a trial where both sides are absolutely unhinged.*
 
 </div>
 
@@ -35,7 +35,7 @@
 
 ---
 
-## WTF is this?
+## What is this?
 
 A **satirical open-source agent framework** that splits AI personality into two irreconcilable extremes:
 
@@ -71,10 +71,10 @@ cd polarity-agent
 pip install -e ".[ollama]"
 
 # Chat with the Yes-Man
-penggen chat --pack advocatus --provider ollama --model llama3
+polarity chat --pack advocatus --provider ollama --model llama3
 
 # Chat with the Troll
-penggen chat --pack inquisitor --provider ollama --model llama3
+polarity chat --pack inquisitor --provider ollama --model llama3
 ```
 
 ### The Cyber Arena (Duel Mode)
@@ -83,13 +83,13 @@ This is why you're really here.
 
 ```bash
 # COURT MODE — one lawyer, one prosecutor, both absolutely unhinged
-penggen duel --mode court --topic "Pineapple belongs on pizza" --rounds 5
+polarity duel --mode court --topic "Pineapple belongs on pizza" --rounds 5
 
 # TROLL FIGHT — two trolls in an infinite loop of mutual destruction
-penggen duel --mode troll-fight --topic "1+1=2" --rounds 3
+polarity duel --mode troll-fight --topic "1+1=2" --rounds 3
 
 # PRAISE BATTLE — two yes-men competing to out-flatter each other
-penggen duel --mode praise-battle --topic "I deserve a raise" --rounds 3
+polarity duel --mode praise-battle --topic "I deserve a raise" --rounds 3
 ```
 
 ### Web UI (One-Click)
@@ -99,7 +99,7 @@ penggen duel --mode praise-battle --topic "I deserve a raise" --rounds 3
 pip install -e ".[web,ollama]"
 
 # Launch Streamlit UI on http://localhost:8501
-penggen serve
+polarity serve
 ```
 
 ### Docker (One-Click-er)
@@ -115,7 +115,7 @@ docker run -p 8501:8501 polarity-agent
 polarity-agent/
 ├── src/polarity_agent/
 │   ├── agent.py              # Core engine — stance-locked stateful chat
-│   ├── cli.py                # Typer + Rich CLI (penggen)
+│   ├── cli.py                # Typer + Rich CLI (polarity)
 │   ├── api.py                # FastAPI backend (/chat, /stream, /packs)
 │   ├── web.py                # Streamlit frontend with cyberpunk aesthetic
 │   ├── tracing.py            # JSONL trace logger for session replay
@@ -128,7 +128,7 @@ polarity-agent/
 │       ├── _builtin/
 │       │   ├── advocatus/    # The Yes-Man persona
 │       │   └── inquisitor/   # The Troll persona
-│       └── _installer.py     # Future: penggen install pack <git_url>
+│       └── _installer.py     # Future: polarity install pack <git_url>
 ├── tests/
 │   ├── persona/
 │   │   └── test_red_team.py  # 32 red-team assertions (see below)
@@ -177,7 +177,7 @@ Each persona is a folder with `config.json` + `system_prompt.txt`. Drop yours in
 Community pack installation (coming soon):
 
 ```bash
-penggen install pack https://github.com/someone/nihilist-pack.git
+polarity install pack https://github.com/someone/nihilist-pack.git
 ```
 
 ## Red Team & Observability
@@ -204,8 +204,8 @@ Every LLM call can be recorded for session replay and debugging:
 
 ```bash
 # Enable tracing on any command
-penggen chat --pack inquisitor --trace
-penggen duel --mode court --topic "AI will replace us" --trace
+polarity chat --pack inquisitor --trace
+polarity duel --mode court --topic "AI will replace us" --trace
 ```
 
 Each call writes a JSONL line to `~/.polarity/traces/`:

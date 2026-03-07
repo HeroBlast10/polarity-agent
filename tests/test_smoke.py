@@ -18,7 +18,7 @@ def test_version_is_string() -> None:
 def test_cli_shows_help() -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert "polarity" in result.stdout.lower() or "penggen" in result.stdout.lower()
+    assert "polarity" in result.stdout.lower()
 
 
 def test_cli_version_flag() -> None:
