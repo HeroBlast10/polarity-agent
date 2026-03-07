@@ -7,12 +7,22 @@ list      Show available persona packs.
 duel      Pit two personas against each other.
 serve     Launch the Gradio web UI.
 install   Install community persona packs.
+
+Environment variables (set in .env or shell)
+--------------------------------------------
+POLARITY_PROVIDER   LLM provider (default: ollama)
+POLARITY_MODEL      Model name   (default: llama3)
+POLARITY_API_KEY    API key      (default: none)
+POLARITY_BASE_URL   Base URL     (default: none)
+POLARITY_PACK       Persona pack (default: advocatus)
 """
 
 import asyncio
+import os
 import random
 import time
 from enum import Enum
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -20,6 +30,37 @@ from rich.panel import Panel
 from rich.table import Table
 
 from polarity_agent import __version__
+
+# ── Load .env file if present (no external dependency needed) ────────────
+
+
+def _load_dotenv() -> None:
+    """Parse a .env file in the project root and populate os.environ.
+
+    Only sets variables that are *not* already defined in the environment,
+    so shell exports always take precedence over the file.
+    """
+    # Prefer project-root .env (repo root is two levels above src/)
+    candidates: list[Path] = []
+    file_root = Path(__file__).resolve().parents[2]
+    candidates.append(file_root / ".env")
+    # Also support running from a different working directory.
+    candidates.append(Path.cwd() / ".env")
+    env_path = next((p for p in candidates if p.is_file()), None)
+    if env_path is None:
+        return
+    with env_path.open(encoding="utf-8") as fh:
+        for raw in fh:
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            os.environ.setdefault(key, value)
+
+
+_load_dotenv()
 
 # ── Module objects ───────────────────────────────────────────────────────
 
@@ -99,11 +140,26 @@ def _root(
 
 @app.command()
 def chat(
-    pack: str = typer.Option("advocatus", "--pack", "-p", help="Persona pack name."),
-    provider: str = typer.Option("ollama", "--provider", help="LLM provider."),
-    model: str = typer.Option("llama3", "--model", "-m", help="Model name."),
-    base_url: str | None = typer.Option(None, "--base-url", help="Provider base URL."),
-    api_key: str | None = typer.Option(None, "--api-key", help="API key."),
+    pack: str = typer.Option(
+        lambda: os.environ.get("POLARITY_PACK", "advocatus"),
+        "--pack", "-p", help="Persona pack name. [env: POLARITY_PACK]",
+    ),
+    provider: str = typer.Option(
+        lambda: os.environ.get("POLARITY_PROVIDER", "ollama"),
+        "--provider", help="LLM provider. [env: POLARITY_PROVIDER]",
+    ),
+    model: str = typer.Option(
+        lambda: os.environ.get("POLARITY_MODEL", "llama3"),
+        "--model", "-m", help="Model name. [env: POLARITY_MODEL]",
+    ),
+    base_url: str | None = typer.Option(
+        lambda: os.environ.get("POLARITY_BASE_URL") or None,
+        "--base-url", help="Provider base URL. [env: POLARITY_BASE_URL]",
+    ),
+    api_key: str | None = typer.Option(
+        lambda: os.environ.get("POLARITY_API_KEY") or None,
+        "--api-key", help="API key. [env: POLARITY_API_KEY]",
+    ),
     trace: bool = typer.Option(False, "--trace", help="Enable JSONL trace logging."),
 ) -> None:
     """Start an interactive chat session with a persona."""
@@ -147,11 +203,23 @@ def duel(
     topic: str = typer.Option(
         ..., "--topic", "-t", prompt="Enter a topic or statement", help="Starting topic."
     ),
-    provider: str = typer.Option("ollama", "--provider", help="LLM provider."),
-    model: str = typer.Option("llama3", "--model", help="Model name."),
+    provider: str = typer.Option(
+        lambda: os.environ.get("POLARITY_PROVIDER", "ollama"),
+        "--provider", help="LLM provider. [env: POLARITY_PROVIDER]",
+    ),
+    model: str = typer.Option(
+        lambda: os.environ.get("POLARITY_MODEL", "llama3"),
+        "--model", help="Model name. [env: POLARITY_MODEL]",
+    ),
     rounds: int = typer.Option(3, "--rounds", "-r", help="Number of rounds."),
-    base_url: str | None = typer.Option(None, "--base-url", help="Provider base URL."),
-    api_key: str | None = typer.Option(None, "--api-key", help="API key."),
+    base_url: str | None = typer.Option(
+        lambda: os.environ.get("POLARITY_BASE_URL") or None,
+        "--base-url", help="Provider base URL. [env: POLARITY_BASE_URL]",
+    ),
+    api_key: str | None = typer.Option(
+        lambda: os.environ.get("POLARITY_API_KEY") or None,
+        "--api-key", help="API key. [env: POLARITY_API_KEY]",
+    ),
     trace: bool = typer.Option(False, "--trace", help="Enable JSONL trace logging."),
 ) -> None:
     """Start a duel between personas in the Cyber Arena."""
@@ -182,8 +250,8 @@ def serve(
             border_style="cyan",
         )
     )
-    demo = create_demo()
-    demo.launch(server_name=host, server_port=port)
+    demo, launch_kwargs = create_demo()
+    demo.launch(server_name=host, server_port=port, **launch_kwargs)
 
 
 @install_app.command("pack")

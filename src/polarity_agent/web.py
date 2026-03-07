@@ -79,8 +79,16 @@ def _get_provider(name: str, model: str, base_url: str, api_key: str) -> BasePro
 # ── Factory ──────────────────────────────────────────────────────────────
 
 
-def create_demo() -> gr.Blocks:
-    """Build and return the Gradio Blocks app."""
+def create_demo() -> tuple[gr.Blocks, dict]:
+    """Build and return the Gradio Blocks app and its launch kwargs.
+
+    In Gradio 6+, ``css`` and ``theme`` must be passed to ``launch()``
+    rather than to the ``Blocks`` constructor.  This function returns them
+    as a second element so callers can forward them correctly::
+
+        demo, launch_kwargs = create_demo()
+        demo.launch(**launch_kwargs)
+    """
     default_provider = os.getenv("POLARITY_PROVIDER", "ollama")
     default_model = os.getenv("POLARITY_MODEL", "llama3")
     default_base_url = os.getenv("POLARITY_BASE_URL", "")
@@ -122,7 +130,7 @@ def create_demo() -> gr.Blocks:
 
     # ── Build UI ─────────────────────────────────────────────
 
-    with gr.Blocks(css=_CSS, title="Polarity.AI", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title="Polarity.AI") as demo:
         gr.HTML(
             '<div class="header-title">P O L A R I T Y . A I</div>'
             '<div class="header-sub">'
@@ -167,9 +175,8 @@ def create_demo() -> gr.Blocks:
 
         gr.ChatInterface(
             fn=respond,
-            type="messages",
             additional_inputs=[persona, provider_dd, model_tb, base_url_tb, api_key_tb],
-            chatbot=gr.Chatbot(height=480, type="messages"),
+            chatbot=gr.Chatbot(height=480),
             textbox=gr.Textbox(
                 placeholder="Type your most controversial opinion. We won't judge. "
                 "(Actually, The Inquisitor will. That's literally its job.)",
@@ -184,4 +191,8 @@ def create_demo() -> gr.Blocks:
             "</div>"
         )
 
-    return demo
+    launch_kwargs: dict = {
+        "css": _CSS,
+        "theme": gr.themes.Soft(),
+    }
+    return demo, launch_kwargs
