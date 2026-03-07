@@ -22,7 +22,7 @@ from polarity_agent.packs import PackLoader
 from polarity_agent.providers import Message, ProviderConfig, create_provider
 from polarity_agent.providers.base import BaseProvider
 
-# ── Page config (must be first Streamlit call) ───────────────────────────
+# ── Page config ──────────────────────────────────────────────────────────
 
 st.set_page_config(
     page_title="Polarity.AI",
@@ -87,39 +87,109 @@ MODES = {
     },
 }
 
-# ── Custom CSS ───────────────────────────────────────────────────────────
+# ── State init ───────────────────────────────────────────────────────────
 
-_CSS = """
-<style>
+if "mode" not in st.session_state:
+    st.session_state.mode = "advocatus"
+if "chat_histories" not in st.session_state:
+    st.session_state.chat_histories = {k: [] for k in MODES}
+if "total_tokens" not in st.session_state:
+    st.session_state.total_tokens = 0
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+
+is_dark = st.session_state.theme == "dark"
+
+# ── CSS (dual-theme) ────────────────────────────────────────────────────
+
+_CSS_DARK = """
+:root {
+    --bg-app-start: #0a0a0f; --bg-app-mid: #0d0d18; --bg-app-end: #0a0f14;
+    --bg-sidebar-start: #0d0d14; --bg-sidebar-end: #111119;
+    --bg-input: #16161e; --bg-card-s: rgba(57,255,20,0.06); --bg-card-s2: rgba(0,229,255,0.03);
+    --bg-card-o: rgba(255,23,68,0.06); --bg-card-o2: rgba(255,0,255,0.03);
+    --bg-card-d: rgba(0,229,255,0.06); --bg-card-d2: rgba(255,0,255,0.03);
+    --text-primary: #cdd6f4; --text-secondary: #666; --text-dim: #444;
+    --text-footer: #2a2a2a;
+    --border-cyan: rgba(0,229,255,0.18); --border-sidebar: rgba(0,229,255,0.1);
+    --disclaimer-bg: rgba(255,23,68,0.06); --disclaimer-border: rgba(255,23,68,0.18);
+    --disclaimer-color: #c05060;
+    --metric-bg: rgba(0,229,255,0.04); --metric-border: rgba(0,229,255,0.12);
+    --msg-user-bg1: rgba(0,229,255,0.07); --msg-user-bg2: rgba(0,229,255,0.02);
+    --msg-support-bg1: rgba(57,255,20,0.07); --msg-support-bg2: rgba(57,255,20,0.02);
+    --msg-oppose-bg1: rgba(255,23,68,0.07); --msg-oppose-bg2: rgba(255,23,68,0.02);
+    --msg-duel-bg1: rgba(0,229,255,0.07); --msg-duel-bg2: rgba(0,229,255,0.02);
+}
+"""
+
+_CSS_LIGHT = """
+:root {
+    --bg-app-start: #f0f2f6; --bg-app-mid: #e8eaf0; --bg-app-end: #f0f2f6;
+    --bg-sidebar-start: #e4e6ec; --bg-sidebar-end: #dfe1e8;
+    --bg-input: #ffffff; --bg-card-s: rgba(57,255,20,0.08); --bg-card-s2: rgba(0,180,200,0.05);
+    --bg-card-o: rgba(255,23,68,0.08); --bg-card-o2: rgba(200,0,200,0.04);
+    --bg-card-d: rgba(0,180,220,0.08); --bg-card-d2: rgba(180,0,220,0.04);
+    --text-primary: #1a1a2e; --text-secondary: #555; --text-dim: #888;
+    --text-footer: #999;
+    --border-cyan: rgba(0,150,180,0.25); --border-sidebar: rgba(0,150,180,0.15);
+    --disclaimer-bg: rgba(255,23,68,0.06); --disclaimer-border: rgba(255,23,68,0.2);
+    --disclaimer-color: #c04050;
+    --metric-bg: rgba(0,150,200,0.06); --metric-border: rgba(0,150,200,0.15);
+    --msg-user-bg1: rgba(0,150,200,0.08); --msg-user-bg2: rgba(0,150,200,0.02);
+    --msg-support-bg1: rgba(40,180,20,0.08); --msg-support-bg2: rgba(40,180,20,0.02);
+    --msg-oppose-bg1: rgba(220,30,60,0.08); --msg-oppose-bg2: rgba(220,30,60,0.02);
+    --msg-duel-bg1: rgba(0,150,200,0.08); --msg-duel-bg2: rgba(0,150,200,0.02);
+}
+"""
+
+_CSS_COMMON = """
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@500;700;900&display=swap');
 
-:root {
-    --neon-cyan: #00e5ff;
-    --neon-green: #39ff14;
-    --neon-red: #ff1744;
-    --neon-magenta: #ff00ff;
-    --bg-dark: #0a0a0f;
-}
-
-/* ── Hide default Streamlit chrome ───────────── */
+/* ── Hide Streamlit chrome ───────────────────── */
 header[data-testid="stHeader"] { display: none !important; }
 #MainMenu { display: none !important; }
 footer { display: none !important; }
 div[data-testid="stStatusWidget"] { display: none !important; }
 
 .stApp {
-    background: linear-gradient(170deg, #0a0a0f 0%, #0d0d18 40%, #0a0f14 100%);
+    background: linear-gradient(170deg, var(--bg-app-start) 0%, var(--bg-app-mid) 40%, var(--bg-app-end) 100%);
+}
+
+/* ── Top-right toolbar ───────────────────────── */
+.top-toolbar {
+    position: fixed;
+    top: 8px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    gap: 6px;
+}
+.top-toolbar button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-cyan);
+    background: var(--bg-input);
+    color: #00e5ff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.top-toolbar button:hover {
+    box-shadow: 0 0 12px rgba(0,229,255,0.2);
 }
 
 /* ── Header ─────────────────────────────────── */
 .cyber-header {
     text-align: center;
-    padding: 1.2rem 0 0.3rem 0;
+    padding: 0.8rem 0 0.2rem 0;
 }
 .cyber-header h1 {
     font-family: 'Orbitron', monospace;
     font-weight: 900;
-    font-size: 2.6rem;
+    font-size: 2.4rem;
     letter-spacing: 0.3em;
     background: linear-gradient(90deg, #00e5ff, #ff00ff, #00e5ff);
     background-size: 200% auto;
@@ -134,55 +204,53 @@ div[data-testid="stStatusWidget"] { display: none !important; }
 }
 .cyber-header .tagline {
     font-family: 'JetBrains Mono', monospace;
-    color: #555;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    margin-top: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    margin-top: 0.2rem;
 }
 
 /* ── Disclaimer ─────────────────────────────── */
 .disclaimer-bar {
     text-align: center;
-    padding: 0.5rem 0.8rem;
+    padding: 0.4rem 0.8rem;
     border-radius: 6px;
-    background: rgba(255, 23, 68, 0.06);
-    border: 1px solid rgba(255, 23, 68, 0.18);
-    color: #c05060;
+    background: var(--disclaimer-bg);
+    border: 1px solid var(--disclaimer-border);
+    color: var(--disclaimer-color);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    margin: 0.5rem auto 0.8rem auto;
+    font-size: 0.66rem;
+    margin: 0.3rem auto 0.6rem auto;
     max-width: 700px;
 }
 
 /* ── Mode cards ─────────────────────────────── */
 .mode-card {
     border-radius: 12px;
-    padding: 0.9rem 0.6rem;
+    padding: 0.8rem 0.5rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.25s ease;
     border: 2px solid transparent;
-    min-height: 120px;
+    min-height: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 .mode-card.support {
-    background: linear-gradient(135deg, rgba(57,255,20,0.06), rgba(0,229,255,0.03));
+    background: linear-gradient(135deg, var(--bg-card-s), var(--bg-card-s2));
     border-color: rgba(57,255,20,0.2);
 }
 .mode-card.oppose {
-    background: linear-gradient(135deg, rgba(255,23,68,0.06), rgba(255,0,255,0.03));
+    background: linear-gradient(135deg, var(--bg-card-o), var(--bg-card-o2));
     border-color: rgba(255,23,68,0.2);
 }
 .mode-card.duel {
-    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,0,255,0.03));
+    background: linear-gradient(135deg, var(--bg-card-d), var(--bg-card-d2));
     border-color: rgba(0,229,255,0.2);
 }
-.mode-card.active {
-    transform: scale(1.02);
-}
+.mode-card.active { transform: scale(1.03); }
 .mode-card.support.active {
     border-color: #39ff14;
     box-shadow: 0 0 20px rgba(57,255,20,0.15), inset 0 0 20px rgba(57,255,20,0.04);
@@ -195,56 +263,64 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     border-color: #00e5ff;
     box-shadow: 0 0 20px rgba(0,229,255,0.15), inset 0 0 20px rgba(0,229,255,0.04);
 }
-.mode-card .mc-icon { font-size: 1.4rem; margin-bottom: 0.2rem; }
+.mode-card .mc-icon { font-size: 1.3rem; margin-bottom: 0.15rem; }
 .mode-card .mc-name {
     font-family: 'Orbitron', monospace;
     font-weight: 700;
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
 }
 .mode-card.support .mc-name { color: #39ff14; }
 .mode-card.oppose .mc-name { color: #ff1744; }
 .mode-card.duel .mc-name { color: #00e5ff; }
 .mode-card .mc-sub {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
-    color: #666;
-    margin-top: 0.15rem;
+    font-size: 0.58rem;
+    color: var(--text-secondary);
+    margin-top: 0.1rem;
+}
+
+/* Hide the st.button under each card */
+.mode-btn-container button {
+    opacity: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: -4px 0 0 0 !important;
+    border: none !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
 
 /* ── Chat messages ──────────────────────────── */
 .chat-msg {
-    padding: 0.9rem 1.1rem;
+    padding: 0.85rem 1rem;
     border-radius: 10px;
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
+    margin: 0.4rem 0;
+    font-size: 0.88rem;
     line-height: 1.6;
+    color: var(--text-primary);
 }
 .chat-msg.user {
-    background: linear-gradient(135deg, rgba(0,229,255,0.07), rgba(0,229,255,0.02));
+    background: linear-gradient(135deg, var(--msg-user-bg1), var(--msg-user-bg2));
     border-left: 3px solid #00e5ff;
-    color: #cdd6f4;
 }
 .chat-msg.assistant-support {
-    background: linear-gradient(135deg, rgba(57,255,20,0.07), rgba(57,255,20,0.02));
+    background: linear-gradient(135deg, var(--msg-support-bg1), var(--msg-support-bg2));
     border-left: 3px solid #39ff14;
-    color: #cdd6f4;
 }
 .chat-msg.assistant-oppose {
-    background: linear-gradient(135deg, rgba(255,23,68,0.07), rgba(255,23,68,0.02));
+    background: linear-gradient(135deg, var(--msg-oppose-bg1), var(--msg-oppose-bg2));
     border-left: 3px solid #ff1744;
-    color: #cdd6f4;
 }
 .chat-msg.assistant-duel {
-    background: linear-gradient(135deg, rgba(0,229,255,0.07), rgba(0,229,255,0.02));
+    background: linear-gradient(135deg, var(--msg-duel-bg1), var(--msg-duel-bg2));
     border-left: 3px solid #00e5ff;
-    color: #cdd6f4;
 }
 .chat-msg .msg-label {
     font-family: 'Orbitron', monospace;
-    font-size: 0.62rem;
+    font-size: 0.6rem;
     letter-spacing: 0.08em;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.25rem;
     opacity: 0.7;
 }
 .chat-msg.user .msg-label { color: #00e5ff; }
@@ -256,69 +332,78 @@ div[data-testid="stStatusWidget"] { display: none !important; }
 .duel-round {
     text-align: center;
     font-family: 'Orbitron', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    color: #555;
-    padding: 0.6rem 0 0.3rem 0;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    color: var(--text-secondary);
+    padding: 0.5rem 0 0.2rem 0;
     border-bottom: 1px solid rgba(0,229,255,0.08);
-    margin: 0.8rem 0 0.4rem 0;
+    margin: 0.6rem 0 0.3rem 0;
 }
 
 /* ── Metrics bar ────────────────────────────── */
 .metric-box {
-    background: rgba(0,229,255,0.04);
-    border: 1px solid rgba(0,229,255,0.12);
+    background: var(--metric-bg);
+    border: 1px solid var(--metric-border);
     border-radius: 8px;
-    padding: 0.5rem 0.6rem;
+    padding: 0.45rem 0.5rem;
     text-align: center;
 }
 .metric-box .metric-val {
     font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #00e5ff;
 }
 .metric-box .metric-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.55rem;
-    color: #444;
+    font-size: 0.52rem;
+    color: var(--text-dim);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 /* ── Sidebar ────────────────────────────────── */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d0d14, #111119) !important;
-    border-right: 1px solid rgba(0,229,255,0.1);
+    background: linear-gradient(180deg, var(--bg-sidebar-start), var(--bg-sidebar-end)) !important;
+    border-right: 1px solid var(--border-sidebar);
+    padding-top: 0.5rem !important;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 0.5rem !important;
 }
 .sidebar-title {
     font-family: 'Orbitron', monospace;
     color: #00e5ff;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    margin-bottom: 0.6rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid rgba(0,229,255,0.12);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid rgba(0,229,255,0.1);
+}
+/* Reduce sidebar hr spacing */
+section[data-testid="stSidebar"] hr {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 /* ── Footer ─────────────────────────────────── */
 .cyber-footer {
     text-align: center;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
-    color: #2a2a2a;
+    font-size: 0.58rem;
+    color: var(--text-footer);
     letter-spacing: 0.04em;
-    padding: 1.5rem 0 0.8rem 0;
+    padding: 1.2rem 0 0.6rem 0;
     border-top: 1px solid rgba(0,229,255,0.05);
-    margin-top: 1.5rem;
+    margin-top: 1rem;
 }
 
-/* ── Streamlit input overrides ──────────────── */
+/* ── Input overrides (sidebar + main) ────────── */
 .stTextInput > div > div > input,
 .stTextInput > div > div > textarea {
-    background: #16161e !important;
-    border: 1px solid rgba(0,229,255,0.18) !important;
-    color: #cdd6f4 !important;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-cyan) !important;
+    color: var(--text-primary) !important;
     font-family: 'JetBrains Mono', monospace !important;
     border-radius: 8px !important;
 }
@@ -327,29 +412,74 @@ section[data-testid="stSidebar"] {
     box-shadow: 0 0 10px rgba(0,229,255,0.12) !important;
 }
 .stSelectbox > div > div {
-    background: #16161e !important;
-    border-color: rgba(0,229,255,0.18) !important;
+    background: var(--bg-input) !important;
+    border-color: var(--border-cyan) !important;
     border-radius: 8px !important;
 }
 .stNumberInput > div > div > input {
-    background: #16161e !important;
-    border: 1px solid rgba(0,229,255,0.18) !important;
-    color: #cdd6f4 !important;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-cyan) !important;
+    color: var(--text-primary) !important;
     font-family: 'JetBrains Mono', monospace !important;
 }
-</style>
+
+/* ── Bottom chat input (dark) ────────────────── */
+div[data-testid="stChatInput"] {
+    background: transparent !important;
+}
+div[data-testid="stChatInput"] textarea {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-cyan) !important;
+    color: var(--text-primary) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    border-radius: 10px !important;
+}
+div[data-testid="stChatInput"] textarea:focus {
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 12px rgba(0,229,255,0.15) !important;
+}
+div[data-testid="stChatInput"] button {
+    background: #00e5ff !important;
+    color: #0a0a0f !important;
+    border-radius: 8px !important;
+}
+/* Bottom bar background */
+.stChatFloatingInputContainer,
+div[data-testid="stBottom"] > div {
+    background: var(--bg-app-start) !important;
+    border-top: 1px solid var(--border-cyan) !important;
+}
 """
 
-st.markdown(_CSS, unsafe_allow_html=True)
+theme_vars = _CSS_DARK if is_dark else _CSS_LIGHT
+st.markdown(f"<style>{theme_vars}\n{_CSS_COMMON}</style>", unsafe_allow_html=True)
 
-# ── State init ───────────────────────────────────────────────────────────
+# ── Top-right toolbar (theme + print) via HTML/JS ────────────────────────
 
-if "mode" not in st.session_state:
-    st.session_state.mode = "advocatus"
-if "chat_histories" not in st.session_state:
-    st.session_state.chat_histories = {k: [] for k in MODES}
-if "total_tokens" not in st.session_state:
-    st.session_state.total_tokens = 0
+_theme_icon = "\u263e" if is_dark else "\u2600"
+_theme_label = "LIGHT" if is_dark else "DARK"
+
+st.markdown(
+    f"""
+<div class="top-toolbar">
+    <button onclick="
+        const params = new URLSearchParams(window.location.search);
+        params.set('theme_toggle', '1');
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = window.location.pathname;
+        params.forEach((v,k) => {{
+            const i = document.createElement('input');
+            i.type='hidden'; i.name=k; i.value=v;
+            form.appendChild(i);
+        }});
+        document.body.appendChild(form);
+    " id="theme-btn-visual">{_theme_icon} {_theme_label}</button>
+    <button onclick="window.print()">PRINT</button>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
 # ── Sidebar ──────────────────────────────────────────────────────────────
 
@@ -379,7 +509,6 @@ with st.sidebar:
         '<div class="sidebar-title">// SESSION</div>',
         unsafe_allow_html=True,
     )
-
     col_clr1, col_clr2 = st.columns(2)
     with col_clr1:
         if st.button("Clear Current", use_container_width=True):
@@ -390,6 +519,22 @@ with st.sidebar:
             st.session_state.chat_histories = {k: [] for k in MODES}
             st.session_state.total_tokens = 0
             st.rerun()
+
+    st.markdown("---")
+    st.markdown(
+        '<div class="sidebar-title">// THEME</div>',
+        unsafe_allow_html=True,
+    )
+    new_theme = st.radio(
+        "Color scheme",
+        options=["dark", "light"],
+        index=0 if is_dark else 1,
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    if new_theme != st.session_state.theme:
+        st.session_state.theme = new_theme
+        st.rerun()
 
     st.markdown("---")
     st.markdown('<div class="sidebar-title">// ABOUT</div>', unsafe_allow_html=True)
@@ -419,7 +564,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Mode selector (5 clickable cards) ────────────────────────────────────
+# ── Mode selector (clickable cards, hidden buttons) ──────────────────────
 
 cols = st.columns(5)
 mode_keys = list(MODES.keys())
@@ -435,12 +580,18 @@ for i, key in enumerate(mode_keys):
             f"</div>",
             unsafe_allow_html=True,
         )
-        if (
-            st.button(m["name"], key=f"mode_{key}", use_container_width=True)
-            and st.session_state.mode != key
-        ):
-            st.session_state.mode = key
-            st.rerun()
+        with st.container():
+            st.markdown(
+                '<div class="mode-btn-container">',
+                unsafe_allow_html=True,
+            )
+            if (
+                st.button(".", key=f"mode_{key}", use_container_width=True)
+                and st.session_state.mode != key
+            ):
+                st.session_state.mode = key
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Resolve active mode ─────────────────────────────────────────────────
 
@@ -530,7 +681,7 @@ def _call_llm(pack_name: str, msg_history: list[dict]) -> tuple[str, float, int]
     return content, elapsed, est
 
 
-# ── Render chat history ──────────────────────────────────────────────────
+# ── Render messages ──────────────────────────────────────────────────────
 
 
 def _render_msg(msg: dict) -> None:
@@ -621,18 +772,14 @@ if not is_duel:
 
 
 def _run_duel_court(msgs: list, topic: str, rounds: int) -> None:
-    """Court mode: Advocatus and Inquisitor independently address the topic."""
     msgs.append({"role": "user", "content": topic})
-
     for r in range(1, rounds + 1):
         msgs.append({"type": "round", "round": r})
-
         prompt = (
             topic
             if r == 1
             else f"\u8bf7\u7ee7\u7eed\u5c31\u4ee5\u4e0b\u8bba\u70b9\u8fdb\u884c\u7b2c {r} \u8f6e\u9648\u8ff0:\n{topic}"
         )
-
         with st.spinner(f"Round {r} // Advocatus thinking..."):
             adv_hist = [
                 {"role": m["role"], "content": m["content"]}
@@ -641,7 +788,6 @@ def _run_duel_court(msgs: list, topic: str, rounds: int) -> None:
             ]
             adv_hist.append({"role": "user", "content": prompt})
             resp_a, el_a, tok_a = _call_llm("advocatus", adv_hist)
-
         msgs.append(
             {
                 "role": "assistant",
@@ -662,7 +808,6 @@ def _run_duel_court(msgs: list, topic: str, rounds: int) -> None:
             ]
             inq_hist.append({"role": "user", "content": prompt})
             resp_i, el_i, tok_i = _call_llm("inquisitor", inq_hist)
-
         msgs.append(
             {
                 "role": "assistant",
@@ -677,17 +822,12 @@ def _run_duel_court(msgs: list, topic: str, rounds: int) -> None:
 
 
 def _run_duel_troll(msgs: list, topic: str, rounds: int) -> None:
-    """Troll fight: two Inquisitors feed each other's outputs."""
     msgs.append({"role": "user", "content": topic})
     current = topic
-
     for r in range(1, rounds + 1):
         msgs.append({"type": "round", "round": r})
-
         with st.spinner(f"Round {r} // \u6760\u7cbe A thinking..."):
-            hist_a = [{"role": "user", "content": current}]
-            resp_a, el_a, tok_a = _call_llm("inquisitor", hist_a)
-
+            resp_a, el_a, tok_a = _call_llm("inquisitor", [{"role": "user", "content": current}])
         msgs.append(
             {
                 "role": "assistant",
@@ -699,11 +839,8 @@ def _run_duel_troll(msgs: list, topic: str, rounds: int) -> None:
             }
         )
         st.session_state.total_tokens += tok_a
-
         with st.spinner(f"Round {r} // \u6760\u7cbe B thinking..."):
-            hist_b = [{"role": "user", "content": resp_a}]
-            resp_b, el_b, tok_b = _call_llm("inquisitor", hist_b)
-
+            resp_b, el_b, tok_b = _call_llm("inquisitor", [{"role": "user", "content": resp_a}])
         msgs.append(
             {
                 "role": "assistant",
@@ -719,17 +856,12 @@ def _run_duel_troll(msgs: list, topic: str, rounds: int) -> None:
 
 
 def _run_duel_praise(msgs: list, topic: str, rounds: int) -> None:
-    """Praise battle: two Advocatus agents one-up each other."""
     msgs.append({"role": "user", "content": topic})
     current = topic
-
     for r in range(1, rounds + 1):
         msgs.append({"type": "round", "round": r})
-
         with st.spinner(f"Round {r} // \u6367\u54cf A thinking..."):
-            hist_a = [{"role": "user", "content": current}]
-            resp_a, el_a, tok_a = _call_llm("advocatus", hist_a)
-
+            resp_a, el_a, tok_a = _call_llm("advocatus", [{"role": "user", "content": current}])
         msgs.append(
             {
                 "role": "assistant",
@@ -741,11 +873,8 @@ def _run_duel_praise(msgs: list, topic: str, rounds: int) -> None:
             }
         )
         st.session_state.total_tokens += tok_a
-
         with st.spinner(f"Round {r} // \u6367\u54cf B thinking..."):
-            hist_b = [{"role": "user", "content": resp_a}]
-            resp_b, el_b, tok_b = _call_llm("advocatus", hist_b)
-
+            resp_b, el_b, tok_b = _call_llm("advocatus", [{"role": "user", "content": resp_a}])
         msgs.append(
             {
                 "role": "assistant",
@@ -764,7 +893,6 @@ def _run_duel_praise(msgs: list, topic: str, rounds: int) -> None:
 
 if is_duel:
     duel_topic = st.chat_input(placeholder="Enter a topic or statement for the duel...")
-
     if duel_topic:
         try:
             if active_mode == "duel_court":
@@ -776,7 +904,6 @@ if is_duel:
             st.rerun()
         except Exception as exc:
             st.error(f"Duel error: {exc}")
-
 
 # ── Footer ───────────────────────────────────────────────────────────────
 
