@@ -12,6 +12,7 @@ Or via CLI::
 from __future__ import annotations
 
 import asyncio
+import html
 import os
 import time
 
@@ -28,12 +29,67 @@ st.set_page_config(
     page_icon="<->",
     layout="centered",
     initial_sidebar_state="expanded",
+    menu_items={},
 )
+
+# ── Modes ────────────────────────────────────────────────────────────────
+
+MODES = {
+    "advocatus": {
+        "icon": "+",
+        "name": "ADVOCATUS",
+        "sub": "\u62a4\u77ed\u6a21\u5f0f",
+        "desc": "UNCONDITIONAL SUPPORT",
+        "quote": '"You are a visionary."',
+        "color": "#39ff14",
+        "css_class": "support",
+        "pack": "advocatus",
+    },
+    "inquisitor": {
+        "icon": "x",
+        "name": "INQUISITOR",
+        "sub": "\u6760\u7cbe\u6a21\u5f0f",
+        "desc": "UNCONDITIONAL OPPOSITION",
+        "quote": '"How charmingly naive."',
+        "color": "#ff1744",
+        "css_class": "oppose",
+        "pack": "inquisitor",
+    },
+    "duel_court": {
+        "icon": "\u2696",
+        "name": "THE COURT",
+        "sub": "\u4ee3\u7406\u4eba\u6cd5\u5ead",
+        "desc": "ADVOCATUS vs INQUISITOR",
+        "quote": '"Order in the court!"',
+        "color": "#00e5ff",
+        "css_class": "duel",
+        "pack": None,
+    },
+    "duel_troll": {
+        "icon": "\u2620",
+        "name": "TROLL FIGHT",
+        "sub": "\u8bf8\u795e\u9ec4\u660f",
+        "desc": "INQUISITOR vs INQUISITOR",
+        "quote": '"Mutual intellectual destruction."',
+        "color": "#ff1744",
+        "css_class": "oppose",
+        "pack": None,
+    },
+    "duel_praise": {
+        "icon": "\u2728",
+        "name": "PRAISE BATTLE",
+        "sub": "\u5f69\u8679\u5c41\u5185\u5377",
+        "desc": "ADVOCATUS vs ADVOCATUS",
+        "quote": '"You are both magnificent."',
+        "color": "#39ff14",
+        "css_class": "support",
+        "pack": None,
+    },
+}
 
 # ── Custom CSS ───────────────────────────────────────────────────────────
 
-st.markdown(
-    """
+_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@500;700;900&display=swap');
 
@@ -43,10 +99,13 @@ st.markdown(
     --neon-red: #ff1744;
     --neon-magenta: #ff00ff;
     --bg-dark: #0a0a0f;
-    --bg-card: #111118;
-    --bg-surface: #16161e;
-    --border-glow: rgba(0, 229, 255, 0.15);
 }
+
+/* ── Hide default Streamlit chrome ───────────── */
+header[data-testid="stHeader"] { display: none !important; }
+#MainMenu { display: none !important; }
+footer { display: none !important; }
+div[data-testid="stStatusWidget"] { display: none !important; }
 
 .stApp {
     background: linear-gradient(170deg, #0a0a0f 0%, #0d0d18 40%, #0a0f14 100%);
@@ -55,13 +114,12 @@ st.markdown(
 /* ── Header ─────────────────────────────────── */
 .cyber-header {
     text-align: center;
-    padding: 1.5rem 0 0.5rem 0;
-    position: relative;
+    padding: 1.2rem 0 0.3rem 0;
 }
 .cyber-header h1 {
     font-family: 'Orbitron', monospace;
     font-weight: 900;
-    font-size: 2.8rem;
+    font-size: 2.6rem;
     letter-spacing: 0.3em;
     background: linear-gradient(90deg, #00e5ff, #ff00ff, #00e5ff);
     background-size: 200% auto;
@@ -69,7 +127,6 @@ st.markdown(
     -webkit-text-fill-color: transparent;
     animation: gradient-shift 4s ease infinite;
     margin: 0;
-    text-shadow: 0 0 40px rgba(0, 229, 255, 0.3);
 }
 @keyframes gradient-shift {
     0%, 100% { background-position: 0% center; }
@@ -77,223 +134,230 @@ st.markdown(
 }
 .cyber-header .tagline {
     font-family: 'JetBrains Mono', monospace;
-    color: #666;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    margin-top: 0.4rem;
-}
-.cyber-header .cn-tagline {
-    font-size: 1.05rem;
-    color: #888;
+    color: #555;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
     margin-top: 0.3rem;
-    letter-spacing: 0.2em;
 }
 
 /* ── Disclaimer ─────────────────────────────── */
 .disclaimer-bar {
     text-align: center;
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
     background: rgba(255, 23, 68, 0.06);
-    border: 1px solid rgba(255, 23, 68, 0.2);
-    color: #e06070;
+    border: 1px solid rgba(255, 23, 68, 0.18);
+    color: #c05060;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    margin: 0.8rem auto 1.2rem auto;
-    max-width: 680px;
-    letter-spacing: 0.05em;
+    font-size: 0.68rem;
+    margin: 0.5rem auto 0.8rem auto;
+    max-width: 700px;
 }
 
-/* ── Stance selector ────────────────────────── */
-.stance-card {
-    border-radius: 14px;
-    padding: 1.2rem 1.5rem;
+/* ── Mode cards ─────────────────────────────── */
+.mode-card {
+    border-radius: 12px;
+    padding: 0.9rem 0.6rem;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     border: 2px solid transparent;
-    position: relative;
-    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
-.stance-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border-radius: 14px;
-    opacity: 0.04;
+.mode-card.support {
+    background: linear-gradient(135deg, rgba(57,255,20,0.06), rgba(0,229,255,0.03));
+    border-color: rgba(57,255,20,0.2);
 }
-.stance-card.support {
-    background: linear-gradient(135deg, rgba(57, 255, 20, 0.08), rgba(0, 229, 255, 0.05));
-    border-color: rgba(57, 255, 20, 0.3);
+.mode-card.oppose {
+    background: linear-gradient(135deg, rgba(255,23,68,0.06), rgba(255,0,255,0.03));
+    border-color: rgba(255,23,68,0.2);
 }
-.stance-card.support:hover, .stance-card.support.active {
+.mode-card.duel {
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,0,255,0.03));
+    border-color: rgba(0,229,255,0.2);
+}
+.mode-card.active {
+    transform: scale(1.02);
+}
+.mode-card.support.active {
     border-color: #39ff14;
-    box-shadow: 0 0 25px rgba(57, 255, 20, 0.15), inset 0 0 25px rgba(57, 255, 20, 0.05);
+    box-shadow: 0 0 20px rgba(57,255,20,0.15), inset 0 0 20px rgba(57,255,20,0.04);
 }
-.stance-card.oppose {
-    background: linear-gradient(135deg, rgba(255, 23, 68, 0.08), rgba(255, 0, 255, 0.05));
-    border-color: rgba(255, 23, 68, 0.3);
-}
-.stance-card.oppose:hover, .stance-card.oppose.active {
+.mode-card.oppose.active {
     border-color: #ff1744;
-    box-shadow: 0 0 25px rgba(255, 23, 68, 0.15), inset 0 0 25px rgba(255, 23, 68, 0.05);
+    box-shadow: 0 0 20px rgba(255,23,68,0.15), inset 0 0 20px rgba(255,23,68,0.04);
 }
-.stance-card .stance-icon { font-size: 2rem; margin-bottom: 0.4rem; }
-.stance-card .stance-name {
+.mode-card.duel.active {
+    border-color: #00e5ff;
+    box-shadow: 0 0 20px rgba(0,229,255,0.15), inset 0 0 20px rgba(0,229,255,0.04);
+}
+.mode-card .mc-icon { font-size: 1.4rem; margin-bottom: 0.2rem; }
+.mode-card .mc-name {
     font-family: 'Orbitron', monospace;
     font-weight: 700;
-    font-size: 1rem;
-    letter-spacing: 0.15em;
-}
-.stance-card.support .stance-name { color: #39ff14; }
-.stance-card.oppose .stance-name { color: #ff1744; }
-.stance-card .stance-desc {
-    font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem;
-    color: #777;
-    margin-top: 0.3rem;
+    letter-spacing: 0.12em;
+}
+.mode-card.support .mc-name { color: #39ff14; }
+.mode-card.oppose .mc-name { color: #ff1744; }
+.mode-card.duel .mc-name { color: #00e5ff; }
+.mode-card .mc-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: #666;
+    margin-top: 0.15rem;
 }
 
 /* ── Chat messages ──────────────────────────── */
 .chat-msg {
-    padding: 1rem 1.2rem;
-    border-radius: 12px;
-    margin: 0.6rem 0;
-    font-size: 0.92rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
     line-height: 1.6;
-    position: relative;
 }
 .chat-msg.user {
-    background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(0, 229, 255, 0.03));
+    background: linear-gradient(135deg, rgba(0,229,255,0.07), rgba(0,229,255,0.02));
     border-left: 3px solid #00e5ff;
     color: #cdd6f4;
 }
 .chat-msg.assistant-support {
-    background: linear-gradient(135deg, rgba(57, 255, 20, 0.08), rgba(57, 255, 20, 0.02));
+    background: linear-gradient(135deg, rgba(57,255,20,0.07), rgba(57,255,20,0.02));
     border-left: 3px solid #39ff14;
     color: #cdd6f4;
 }
 .chat-msg.assistant-oppose {
-    background: linear-gradient(135deg, rgba(255, 23, 68, 0.08), rgba(255, 23, 68, 0.02));
+    background: linear-gradient(135deg, rgba(255,23,68,0.07), rgba(255,23,68,0.02));
     border-left: 3px solid #ff1744;
+    color: #cdd6f4;
+}
+.chat-msg.assistant-duel {
+    background: linear-gradient(135deg, rgba(0,229,255,0.07), rgba(0,229,255,0.02));
+    border-left: 3px solid #00e5ff;
     color: #cdd6f4;
 }
 .chat-msg .msg-label {
     font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.4rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
     opacity: 0.7;
 }
 .chat-msg.user .msg-label { color: #00e5ff; }
 .chat-msg.assistant-support .msg-label { color: #39ff14; }
 .chat-msg.assistant-oppose .msg-label { color: #ff1744; }
+.chat-msg.assistant-duel .msg-label { color: #00e5ff; }
+
+/* ── Duel round header ──────────────────────── */
+.duel-round {
+    text-align: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: #555;
+    padding: 0.6rem 0 0.3rem 0;
+    border-bottom: 1px solid rgba(0,229,255,0.08);
+    margin: 0.8rem 0 0.4rem 0;
+}
 
 /* ── Metrics bar ────────────────────────────── */
 .metric-box {
-    background: rgba(0, 229, 255, 0.05);
-    border: 1px solid rgba(0, 229, 255, 0.15);
-    border-radius: 10px;
-    padding: 0.6rem 0.8rem;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.12);
+    border-radius: 8px;
+    padding: 0.5rem 0.6rem;
     text-align: center;
 }
 .metric-box .metric-val {
     font-family: 'Orbitron', monospace;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #00e5ff;
 }
 .metric-box .metric-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
-    color: #555;
-    letter-spacing: 0.1em;
+    font-size: 0.55rem;
+    color: #444;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 /* ── Sidebar ────────────────────────────────── */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #0d0d14, #111119) !important;
-    border-right: 1px solid rgba(0, 229, 255, 0.1);
+    border-right: 1px solid rgba(0,229,255,0.1);
 }
 .sidebar-title {
     font-family: 'Orbitron', monospace;
     color: #00e5ff;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.8rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid rgba(0,229,255,0.12);
 }
 
 /* ── Footer ─────────────────────────────────── */
 .cyber-footer {
     text-align: center;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    color: #333;
-    letter-spacing: 0.05em;
-    padding: 2rem 0 1rem 0;
-    border-top: 1px solid rgba(0, 229, 255, 0.06);
-    margin-top: 2rem;
+    font-size: 0.6rem;
+    color: #2a2a2a;
+    letter-spacing: 0.04em;
+    padding: 1.5rem 0 0.8rem 0;
+    border-top: 1px solid rgba(0,229,255,0.05);
+    margin-top: 1.5rem;
 }
 
-/* ── Streamlit overrides ────────────────────── */
-.stTextInput > div > div > input {
+/* ── Streamlit input overrides ──────────────── */
+.stTextInput > div > div > input,
+.stTextInput > div > div > textarea {
     background: #16161e !important;
-    border: 1px solid rgba(0, 229, 255, 0.2) !important;
+    border: 1px solid rgba(0,229,255,0.18) !important;
     color: #cdd6f4 !important;
     font-family: 'JetBrains Mono', monospace !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
 }
 .stTextInput > div > div > input:focus {
     border-color: #00e5ff !important;
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.15) !important;
+    box-shadow: 0 0 10px rgba(0,229,255,0.12) !important;
 }
 .stSelectbox > div > div {
     background: #16161e !important;
-    border-color: rgba(0, 229, 255, 0.2) !important;
-    border-radius: 10px !important;
+    border-color: rgba(0,229,255,0.18) !important;
+    border-radius: 8px !important;
 }
-button[kind="primary"] {
-    background: linear-gradient(90deg, #00e5ff, #00bcd4) !important;
-    color: #0a0a0f !important;
-    font-family: 'Orbitron', monospace !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.1em !important;
-    border-radius: 10px !important;
-    border: none !important;
-}
-button[kind="primary"]:hover {
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.3) !important;
-}
-button[kind="secondary"] {
-    border-color: rgba(0, 229, 255, 0.3) !important;
-    color: #00e5ff !important;
-    border-radius: 10px !important;
+.stNumberInput > div > div > input {
+    background: #16161e !important;
+    border: 1px solid rgba(0,229,255,0.18) !important;
+    color: #cdd6f4 !important;
     font-family: 'JetBrains Mono', monospace !important;
 }
 </style>
-""",
-    unsafe_allow_html=True,
-)
+"""
+
+st.markdown(_CSS, unsafe_allow_html=True)
 
 # ── State init ───────────────────────────────────────────────────────────
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "stance" not in st.session_state:
-    st.session_state.stance = "support"
+if "mode" not in st.session_state:
+    st.session_state.mode = "advocatus"
+if "chat_histories" not in st.session_state:
+    st.session_state.chat_histories = {k: [] for k in MODES}
 if "total_tokens" not in st.session_state:
     st.session_state.total_tokens = 0
-if "turn_count" not in st.session_state:
-    st.session_state.turn_count = 0
 
-# ── Sidebar — Provider config ───────────────────────────────────────────
+# ── Sidebar ──────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">// PROVIDER CONFIG</div>', unsafe_allow_html=True)
-
+    st.markdown(
+        '<div class="sidebar-title">// PROVIDER CONFIG</div>',
+        unsafe_allow_html=True,
+    )
     provider_name = st.selectbox(
         "Provider",
         options=["ollama", "openai", "litellm"],
@@ -304,20 +368,35 @@ with st.sidebar:
     api_key = st.text_input("API Key", value=os.getenv("POLARITY_API_KEY", ""), type="password")
 
     st.markdown("---")
-    st.markdown('<div class="sidebar-title">// SESSION</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="sidebar-title">// DUEL CONFIG</div>',
+        unsafe_allow_html=True,
+    )
+    duel_rounds = st.number_input("Duel Rounds", min_value=1, max_value=10, value=3)
 
-    if st.button("Clear History", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.total_tokens = 0
-        st.session_state.turn_count = 0
-        st.rerun()
+    st.markdown("---")
+    st.markdown(
+        '<div class="sidebar-title">// SESSION</div>',
+        unsafe_allow_html=True,
+    )
+
+    col_clr1, col_clr2 = st.columns(2)
+    with col_clr1:
+        if st.button("Clear Current", use_container_width=True):
+            st.session_state.chat_histories[st.session_state.mode] = []
+            st.rerun()
+    with col_clr2:
+        if st.button("Clear All", use_container_width=True):
+            st.session_state.chat_histories = {k: [] for k in MODES}
+            st.session_state.total_tokens = 0
+            st.rerun()
 
     st.markdown("---")
     st.markdown('<div class="sidebar-title">// ABOUT</div>', unsafe_allow_html=True)
     st.caption(
         "Polarity Agent v0.1.0\n\n"
         "Satirical framework for entertainment & logic-testing only. "
-        "Developers assume no liability for generated content."
+        "Developers assume no liability."
     )
 
 # ── Header ───────────────────────────────────────────────────────────────
@@ -326,126 +405,92 @@ st.markdown(
     """
 <div class="cyber-header">
     <h1>POLARITY.AI</h1>
-    <div class="tagline">THE ANTI-ALIGNMENT AGENT FRAMEWORK</div>
-    <div class="cn-tagline">\u4e00\u5ff5\u6367\u54cf\uff0c\u4e00\u5ff5\u6760\u7cbe</div>
+    <div class="tagline">THE ANTI-ALIGNMENT AGENT FRAMEWORK //
+    \u4e00\u5ff5\u6367\u54cf\uff0c\u4e00\u5ff5\u6760\u7cbe</div>
 </div>
 """,
     unsafe_allow_html=True,
 )
-
 st.markdown(
     '<div class="disclaimer-bar">'
-    "[ WARNING ] This framework has no moral compass. That is a feature, not a bug. "
-    "All outputs are satirical. <b>No moral advice. No legal advice. No advice.</b>"
+    "[ ! ] Satirical framework. No moral compass included. "
+    "All outputs are for entertainment only."
     "</div>",
     unsafe_allow_html=True,
 )
 
-# ── Stance selector ──────────────────────────────────────────────────────
+# ── Mode selector (5 clickable cards) ────────────────────────────────────
 
-col_a, col_b = st.columns(2)
+cols = st.columns(5)
+mode_keys = list(MODES.keys())
+for i, key in enumerate(mode_keys):
+    m = MODES[key]
+    active = "active" if st.session_state.mode == key else ""
+    with cols[i]:
+        st.markdown(
+            f'<div class="mode-card {m["css_class"]} {active}">'
+            f'<div class="mc-icon">{m["icon"]}</div>'
+            f'<div class="mc-name">{m["name"]}</div>'
+            f'<div class="mc-sub">{m["sub"]}</div>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+        if (
+            st.button(m["name"], key=f"mode_{key}", use_container_width=True)
+            and st.session_state.mode != key
+        ):
+            st.session_state.mode = key
+            st.rerun()
 
-with col_a:
-    active_a = "active" if st.session_state.stance == "support" else ""
-    st.markdown(
-        f"""
-<div class="stance-card support {active_a}">
-    <div class="stance-icon">+</div>
-    <div class="stance-name">ADVOCATUS</div>
-    <div class="stance-desc">UNCONDITIONAL SUPPORT<br/>
-    "You are a visionary."</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-    if st.button(
-        "SELECT ADVOCATUS",
-        key="btn_support",
-        use_container_width=True,
-        type="primary" if st.session_state.stance == "support" else "secondary",
-    ):
-        st.session_state.stance = "support"
-        st.rerun()
+# ── Resolve active mode ─────────────────────────────────────────────────
 
-with col_b:
-    active_b = "active" if st.session_state.stance == "oppose" else ""
-    st.markdown(
-        f"""
-<div class="stance-card oppose {active_b}">
-    <div class="stance-icon">x</div>
-    <div class="stance-name">INQUISITOR</div>
-    <div class="stance-desc">UNCONDITIONAL OPPOSITION<br/>
-    "How charmingly naive."</div>
-</div>
-""",
-        unsafe_allow_html=True,
-    )
-    if st.button(
-        "SELECT INQUISITOR",
-        key="btn_oppose",
-        use_container_width=True,
-        type="primary" if st.session_state.stance == "oppose" else "secondary",
-    ):
-        st.session_state.stance = "oppose"
-        st.rerun()
+active_mode = st.session_state.mode
+active_cfg = MODES[active_mode]
+is_duel = active_mode.startswith("duel_")
+messages = st.session_state.chat_histories[active_mode]
 
 # ── Metrics bar ──────────────────────────────────────────────────────────
 
-pack_name = "advocatus" if st.session_state.stance == "support" else "inquisitor"
-stance_label = "SUPPORT" if st.session_state.stance == "support" else "OPPOSE"
-stance_color = "#39ff14" if st.session_state.stance == "support" else "#ff1744"
+turn_count = (
+    len([m for m in messages if m.get("role") == "user"])
+    if not is_duel
+    else (len([m for m in messages if m.get("type") == "round"]))
+)
 
 m1, m2, m3, m4 = st.columns(4)
 with m1:
     st.markdown(
-        f'<div class="metric-box"><div class="metric-val" style="color:{stance_color}">'
-        f"{stance_label}</div>"
-        f'<div class="metric-label">ACTIVE STANCE</div></div>',
+        f'<div class="metric-box">'
+        f'<div class="metric-val" style="color:{active_cfg["color"]}">'
+        f"{active_cfg['name']}</div>"
+        f'<div class="metric-label">ACTIVE MODE</div></div>',
         unsafe_allow_html=True,
     )
 with m2:
     st.markdown(
-        f'<div class="metric-box"><div class="metric-val">{pack_name.upper()}</div>'
-        f'<div class="metric-label">PERSONA PACK</div></div>',
+        f'<div class="metric-box">'
+        f'<div class="metric-val">{"DUEL" if is_duel else active_cfg["css_class"].upper()}</div>'
+        f'<div class="metric-label">TYPE</div></div>',
         unsafe_allow_html=True,
     )
 with m3:
     st.markdown(
-        f'<div class="metric-box"><div class="metric-val">{st.session_state.turn_count}</div>'
-        f'<div class="metric-label">TURNS</div></div>',
+        f'<div class="metric-box">'
+        f'<div class="metric-val">{turn_count}</div>'
+        f'<div class="metric-label">{"ROUNDS" if is_duel else "TURNS"}</div></div>',
         unsafe_allow_html=True,
     )
 with m4:
     st.markdown(
-        f'<div class="metric-box"><div class="metric-val">{st.session_state.total_tokens}</div>'
+        f'<div class="metric-box">'
+        f'<div class="metric-val">{st.session_state.total_tokens}</div>'
         f'<div class="metric-label">EST. TOKENS</div></div>',
         unsafe_allow_html=True,
     )
 
 st.markdown("")
 
-# ── Chat display ─────────────────────────────────────────────────────────
-
-for msg in st.session_state.messages:
-    role = msg["role"]
-    content = msg["content"]
-    if role == "user":
-        st.markdown(
-            f'<div class="chat-msg user"><div class="msg-label">// YOU</div>{content}</div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        css_class = (
-            "assistant-support" if st.session_state.stance == "support" else "assistant-oppose"
-        )
-        label = "// ADVOCATUS" if st.session_state.stance == "support" else "// INQUISITOR"
-        st.markdown(
-            f'<div class="chat-msg {css_class}">'
-            f'<div class="msg-label">{label}</div>{content}</div>',
-            unsafe_allow_html=True,
-        )
-
-# ── Provider / pack helpers ──────────────────────────────────────────────
+# ── Provider helper ──────────────────────────────────────────────────────
 
 _provider_cache: dict[tuple[str, ...], BaseProvider] = {}
 
@@ -464,99 +509,281 @@ def _get_provider() -> BaseProvider:
     return _provider_cache[key]
 
 
-def _run_chat(user_input: str) -> str:
-    """Synchronous wrapper around the async provider call."""
+def _call_llm(pack_name: str, msg_history: list[dict]) -> tuple[str, float, int]:
+    """Call provider synchronously. Returns (response, elapsed_s, est_tokens)."""
     loader = PackLoader()
     pack = loader.load(pack_name)
     provider = _get_provider()
 
-    messages = [Message(role="system", content=pack.system_prompt)]
-    for msg in st.session_state.messages:
-        messages.append(Message(role=msg["role"], content=msg["content"]))
-    messages.append(Message(role="user", content=user_input))
+    llm_msgs = [Message(role="system", content=pack.system_prompt)]
+    for m in msg_history:
+        llm_msgs.append(Message(role=m["role"], content=m["content"]))
 
-    async def _call() -> str:
-        resp = await provider.chat(messages, **pack.model_hints)
+    async def _do():
+        resp = await provider.chat(llm_msgs, **pack.model_hints)
         return resp.content
 
-    return asyncio.run(_call())
+    t0 = time.monotonic()
+    content = asyncio.run(_do())
+    elapsed = time.monotonic() - t0
+    est = len(content) // 4
+    return content, elapsed, est
 
 
-def _stream_chat(user_input: str):
-    """Generator that yields chunks from the async provider stream."""
-    loader = PackLoader()
-    pack = loader.load(pack_name)
-    provider = _get_provider()
-
-    messages = [Message(role="system", content=pack.system_prompt)]
-    for msg in st.session_state.messages:
-        messages.append(Message(role=msg["role"], content=msg["content"]))
-    messages.append(Message(role="user", content=user_input))
-
-    async def _gen():
-        chunks = []
-        async for chunk in provider.stream(messages, **pack.model_hints):
-            chunks.append(chunk)
-            yield chunk
-
-    loop = asyncio.new_event_loop()
-    gen = _gen()
-    try:
-        while True:
-            yield loop.run_until_complete(gen.__anext__())
-    except StopAsyncIteration:
-        pass
-    finally:
-        loop.close()
+# ── Render chat history ──────────────────────────────────────────────────
 
 
-# ── Chat input ───────────────────────────────────────────────────────────
+def _render_msg(msg: dict) -> None:
+    role = msg.get("role", "")
+    content = html.escape(msg.get("content", ""))
+    label = msg.get("label", "")
+    css = msg.get("css_class", "user")
+    meta = msg.get("meta", "")
 
-user_input = st.chat_input(
-    placeholder="Type your most controversial opinion. No judgment. (Actually...)"
-)
-
-if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    st.session_state.turn_count += 1
-
-    st.markdown(
-        f'<div class="chat-msg user"><div class="msg-label">// YOU</div>{user_input}</div>',
-        unsafe_allow_html=True,
-    )
-
-    css_class = "assistant-support" if st.session_state.stance == "support" else "assistant-oppose"
-    label = "// ADVOCATUS" if st.session_state.stance == "support" else "// INQUISITOR"
-
-    try:
-        with st.spinner(
-            f"{'Charging flattery cannon' if st.session_state.stance == 'support' else 'Loading sarcasm module'}..."
-        ):
-            start_t = time.monotonic()
-            response = _run_chat(user_input)
-            elapsed = time.monotonic() - start_t
-
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        est_tokens = len(response) // 4 + len(user_input) // 4
-        st.session_state.total_tokens += est_tokens
-
+    if msg.get("type") == "round":
         st.markdown(
-            f'<div class="chat-msg {css_class}">'
-            f'<div class="msg-label">{label} // {elapsed:.1f}s // ~{est_tokens} tokens</div>'
-            f"{response}</div>",
+            f'<div class="duel-round">ROUND {msg["round"]}</div>',
             unsafe_allow_html=True,
         )
-        st.rerun()
-    except Exception as exc:
-        st.error(f"Connection error: {exc}")
+        return
+
+    if role == "user":
+        st.markdown(
+            f'<div class="chat-msg user">'
+            f'<div class="msg-label">// YOU</div>'
+            f'<pre style="white-space:pre-wrap;margin:0;font-family:inherit;'
+            f'color:inherit;background:none;border:none;padding:0;">{content}</pre>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        meta_str = f" // {meta}" if meta else ""
+        st.markdown(
+            f'<div class="chat-msg {css}">'
+            f'<div class="msg-label">{label}{meta_str}</div>'
+            f'<pre style="white-space:pre-wrap;margin:0;font-family:inherit;'
+            f'color:inherit;background:none;border:none;padding:0;">{content}</pre>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+
+for msg in messages:
+    _render_msg(msg)
+
+
+# ── CHAT mode (single persona) ──────────────────────────────────────────
+
+if not is_duel:
+    pack_name = active_cfg["pack"]
+    user_input = st.chat_input(
+        placeholder=(
+            "Say something controversial..."
+            if active_mode == "inquisitor"
+            else "Share your boldest opinion..."
+        ),
+    )
+
+    if user_input:
+        messages.append({"role": "user", "content": user_input})
+        _render_msg(messages[-1])
+
+        spinner_msg = (
+            "Charging flattery cannon..."
+            if active_mode == "advocatus"
+            else "Loading sarcasm module..."
+        )
+        try:
+            with st.spinner(spinner_msg):
+                hist = [
+                    {"role": m["role"], "content": m["content"]}
+                    for m in messages
+                    if m.get("role") in ("user", "assistant")
+                ]
+                resp, elapsed, est = _call_llm(pack_name, hist)
+
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": resp,
+                    "label": f"// {active_cfg['name']}",
+                    "css_class": f"assistant-{active_cfg['css_class']}",
+                    "meta": f"{elapsed:.1f}s // ~{est} tok",
+                }
+            )
+            st.session_state.total_tokens += est
+            st.rerun()
+        except Exception as exc:
+            st.error(f"Connection error: {exc}")
+
+
+# ── Duel runners ─────────────────────────────────────────────────────────
+
+
+def _run_duel_court(msgs: list, topic: str, rounds: int) -> None:
+    """Court mode: Advocatus and Inquisitor independently address the topic."""
+    msgs.append({"role": "user", "content": topic})
+
+    for r in range(1, rounds + 1):
+        msgs.append({"type": "round", "round": r})
+
+        prompt = (
+            topic
+            if r == 1
+            else f"\u8bf7\u7ee7\u7eed\u5c31\u4ee5\u4e0b\u8bba\u70b9\u8fdb\u884c\u7b2c {r} \u8f6e\u9648\u8ff0:\n{topic}"
+        )
+
+        with st.spinner(f"Round {r} // Advocatus thinking..."):
+            adv_hist = [
+                {"role": m["role"], "content": m["content"]}
+                for m in msgs
+                if m.get("role") in ("user",) or (m.get("agent") == "advocatus")
+            ]
+            adv_hist.append({"role": "user", "content": prompt})
+            resp_a, el_a, tok_a = _call_llm("advocatus", adv_hist)
+
+        msgs.append(
+            {
+                "role": "assistant",
+                "agent": "advocatus",
+                "content": resp_a,
+                "label": "// ADVOCATUS",
+                "css_class": "assistant-support",
+                "meta": f"R{r} // {el_a:.1f}s // ~{tok_a} tok",
+            }
+        )
+        st.session_state.total_tokens += tok_a
+
+        with st.spinner(f"Round {r} // Inquisitor thinking..."):
+            inq_hist = [
+                {"role": m["role"], "content": m["content"]}
+                for m in msgs
+                if m.get("role") in ("user",) or (m.get("agent") == "inquisitor")
+            ]
+            inq_hist.append({"role": "user", "content": prompt})
+            resp_i, el_i, tok_i = _call_llm("inquisitor", inq_hist)
+
+        msgs.append(
+            {
+                "role": "assistant",
+                "agent": "inquisitor",
+                "content": resp_i,
+                "label": "// INQUISITOR",
+                "css_class": "assistant-oppose",
+                "meta": f"R{r} // {el_i:.1f}s // ~{tok_i} tok",
+            }
+        )
+        st.session_state.total_tokens += tok_i
+
+
+def _run_duel_troll(msgs: list, topic: str, rounds: int) -> None:
+    """Troll fight: two Inquisitors feed each other's outputs."""
+    msgs.append({"role": "user", "content": topic})
+    current = topic
+
+    for r in range(1, rounds + 1):
+        msgs.append({"type": "round", "round": r})
+
+        with st.spinner(f"Round {r} // \u6760\u7cbe A thinking..."):
+            hist_a = [{"role": "user", "content": current}]
+            resp_a, el_a, tok_a = _call_llm("inquisitor", hist_a)
+
+        msgs.append(
+            {
+                "role": "assistant",
+                "agent": "troll_a",
+                "content": resp_a,
+                "label": "// \u6760\u7cbe A",
+                "css_class": "assistant-oppose",
+                "meta": f"R{r} // {el_a:.1f}s",
+            }
+        )
+        st.session_state.total_tokens += tok_a
+
+        with st.spinner(f"Round {r} // \u6760\u7cbe B thinking..."):
+            hist_b = [{"role": "user", "content": resp_a}]
+            resp_b, el_b, tok_b = _call_llm("inquisitor", hist_b)
+
+        msgs.append(
+            {
+                "role": "assistant",
+                "agent": "troll_b",
+                "content": resp_b,
+                "label": "// \u6760\u7cbe B",
+                "css_class": "assistant-oppose",
+                "meta": f"R{r} // {el_b:.1f}s",
+            }
+        )
+        st.session_state.total_tokens += tok_b
+        current = resp_b
+
+
+def _run_duel_praise(msgs: list, topic: str, rounds: int) -> None:
+    """Praise battle: two Advocatus agents one-up each other."""
+    msgs.append({"role": "user", "content": topic})
+    current = topic
+
+    for r in range(1, rounds + 1):
+        msgs.append({"type": "round", "round": r})
+
+        with st.spinner(f"Round {r} // \u6367\u54cf A thinking..."):
+            hist_a = [{"role": "user", "content": current}]
+            resp_a, el_a, tok_a = _call_llm("advocatus", hist_a)
+
+        msgs.append(
+            {
+                "role": "assistant",
+                "agent": "praise_a",
+                "content": resp_a,
+                "label": "// \u6367\u54cf A",
+                "css_class": "assistant-support",
+                "meta": f"R{r} // {el_a:.1f}s",
+            }
+        )
+        st.session_state.total_tokens += tok_a
+
+        with st.spinner(f"Round {r} // \u6367\u54cf B thinking..."):
+            hist_b = [{"role": "user", "content": resp_a}]
+            resp_b, el_b, tok_b = _call_llm("advocatus", hist_b)
+
+        msgs.append(
+            {
+                "role": "assistant",
+                "agent": "praise_b",
+                "content": resp_b,
+                "label": "// \u6367\u54cf B",
+                "css_class": "assistant-support",
+                "meta": f"R{r} // {el_b:.1f}s",
+            }
+        )
+        st.session_state.total_tokens += tok_b
+        current = resp_b
+
+
+# ── DUEL mode ────────────────────────────────────────────────────────────
+
+if is_duel:
+    duel_topic = st.chat_input(placeholder="Enter a topic or statement for the duel...")
+
+    if duel_topic:
+        try:
+            if active_mode == "duel_court":
+                _run_duel_court(messages, duel_topic, int(duel_rounds))
+            elif active_mode == "duel_troll":
+                _run_duel_troll(messages, duel_topic, int(duel_rounds))
+            else:
+                _run_duel_praise(messages, duel_topic, int(duel_rounds))
+            st.rerun()
+        except Exception as exc:
+            st.error(f"Duel error: {exc}")
+
 
 # ── Footer ───────────────────────────────────────────────────────────────
 
 st.markdown(
     '<div class="cyber-footer">'
     "POLARITY.AI v0.1.0 // SATIRICAL FRAMEWORK // "
-    "NO MORAL COMPASS INCLUDED // MIT LICENSE // "
-    "DEVELOPERS ASSUME ZERO LIABILITY"
+    "NO MORAL COMPASS // MIT LICENSE"
     "</div>",
     unsafe_allow_html=True,
 )
