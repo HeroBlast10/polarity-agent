@@ -32,23 +32,6 @@ st.set_page_config(
     menu_items={},
 )
 
-# ── Handle theme toggle from query param (top-right button) ──────────────
-
-_qs = st.query_params
-if _qs.get("theme_toggle") == "1":
-    st.session_state.theme = "light" if st.session_state.get("theme", "dark") == "dark" else "dark"
-    st.query_params.clear()
-    st.rerun()
-
-# ── Handle mode selection from query param (card click via JS) ───────────
-
-_mode_pick = _qs.get("set_mode")
-if _mode_pick and _mode_pick != st.session_state.get("mode", "advocatus"):
-    st.session_state.mode = _mode_pick
-    st.query_params.clear()
-    st.rerun()
-elif _mode_pick:
-    st.query_params.clear()
 
 # ── Modes ────────────────────────────────────────────────────────────────
 
@@ -177,30 +160,29 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     background: linear-gradient(170deg, var(--bg-app-start) 0%, var(--bg-app-mid) 40%, var(--bg-app-end) 100%);
 }
 
-/* ── Top-right toolbar ───────────────────────── */
-.top-toolbar {
+/* ── Top-right toolbar (Streamlit buttons) ──── */
+div[data-testid="stHorizontalBlock"].toolbar-row {
     position: fixed;
     top: 8px;
     right: 16px;
     z-index: 9999;
-    display: flex;
-    gap: 6px;
 }
-.top-toolbar button {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    padding: 5px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-cyan);
-    background: var(--bg-input);
-    color: var(--color-accent);
-    cursor: pointer;
-    transition: all 0.2s ease;
+.toolbar-btn button {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.66rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--border-cyan) !important;
+    background: var(--bg-input) !important;
+    color: var(--color-accent) !important;
+    min-height: 0 !important;
+    height: auto !important;
+    line-height: 1.4 !important;
 }
-.top-toolbar button:hover {
-    box-shadow: 0 0 12px rgba(0,229,255,0.2);
+.toolbar-btn button:hover {
+    box-shadow: 0 0 12px rgba(0,229,255,0.2) !important;
 }
 
 /* ── Header ─────────────────────────────────── */
@@ -246,12 +228,14 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     max-width: 700px;
 }
 
-/* ── Mode cards (pure HTML/JS, no st.button) ── */
-.mode-card {
+/* ── Mode cards (st.button styled as card) ──── */
+.mode-card-wrapper {
+    position: relative;
+}
+.mode-card-wrapper .card-visual {
     border-radius: 12px;
     padding: 0.8rem 0.5rem;
     text-align: center;
-    cursor: pointer;
     transition: all 0.25s ease;
     border: 2px solid transparent;
     min-height: 100px;
@@ -259,51 +243,74 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
 }
-.mode-card:hover { transform: scale(1.03); }
-.mode-card.support {
+.mode-card-wrapper:hover .card-visual { transform: scale(1.03); }
+.mode-card-wrapper.support .card-visual {
     background: linear-gradient(135deg, var(--bg-card-s), var(--bg-card-s2));
     border-color: color-mix(in srgb, var(--color-support) 30%, transparent);
 }
-.mode-card.oppose {
+.mode-card-wrapper.oppose .card-visual {
     background: linear-gradient(135deg, var(--bg-card-o), var(--bg-card-o2));
     border-color: color-mix(in srgb, var(--color-oppose) 30%, transparent);
 }
-.mode-card.duel {
+.mode-card-wrapper.duel .card-visual {
     background: linear-gradient(135deg, var(--bg-card-d), var(--bg-card-d2));
     border-color: color-mix(in srgb, var(--color-duel) 30%, transparent);
 }
-.mode-card.active { transform: scale(1.03); }
-.mode-card.support.active {
+.mode-card-wrapper.active .card-visual { transform: scale(1.03); }
+.mode-card-wrapper.support.active .card-visual {
     border-color: var(--color-support);
     box-shadow: 0 0 20px color-mix(in srgb, var(--color-support) 18%, transparent),
                 inset 0 0 20px color-mix(in srgb, var(--color-support) 5%, transparent);
 }
-.mode-card.oppose.active {
+.mode-card-wrapper.oppose.active .card-visual {
     border-color: var(--color-oppose);
     box-shadow: 0 0 20px color-mix(in srgb, var(--color-oppose) 18%, transparent),
                 inset 0 0 20px color-mix(in srgb, var(--color-oppose) 5%, transparent);
 }
-.mode-card.duel.active {
+.mode-card-wrapper.duel.active .card-visual {
     border-color: var(--color-duel);
     box-shadow: 0 0 20px color-mix(in srgb, var(--color-duel) 18%, transparent),
                 inset 0 0 20px color-mix(in srgb, var(--color-duel) 5%, transparent);
 }
-.mode-card .mc-icon { font-size: 1.3rem; margin-bottom: 0.15rem; }
-.mode-card .mc-name {
+.card-visual .mc-icon { font-size: 1.3rem; margin-bottom: 0.15rem; }
+.card-visual .mc-name {
     font-family: 'Orbitron', monospace;
     font-weight: 700;
     font-size: 0.68rem;
     letter-spacing: 0.1em;
 }
-.mode-card.support .mc-name { color: var(--color-support); }
-.mode-card.oppose .mc-name { color: var(--color-oppose); }
-.mode-card.duel .mc-name { color: var(--color-duel); }
-.mode-card .mc-sub {
+.mode-card-wrapper.support .mc-name { color: var(--color-support); }
+.mode-card-wrapper.oppose .mc-name { color: var(--color-oppose); }
+.mode-card-wrapper.duel .mc-name { color: var(--color-duel); }
+.card-visual .mc-sub {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     color: var(--text-secondary);
     margin-top: 0.1rem;
+}
+/* Overlay st.button on top of card visual */
+.mode-card-wrapper button[kind="secondary"] {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    z-index: 2 !important;
+}
+.mode-card-wrapper div[data-testid="stButton"] {
+    position: absolute !important;
+    inset: 0 !important;
+}
+.mode-card-wrapper div[data-testid="stButton"] > button {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
 }
 
 /* ── Chat messages ──────────────────────────── */
@@ -474,24 +481,22 @@ div[data-testid="stBottom"] > div {
 theme_vars = _CSS_DARK if is_dark else _CSS_LIGHT
 st.markdown(f"<style>{theme_vars}\n{_CSS_COMMON}</style>", unsafe_allow_html=True)
 
-# ── Top-right toolbar (theme + print) via HTML/JS ────────────────────────
+# ── Top-right toolbar (theme + print) ─────────────────────────────────────
 
-_theme_icon = "\u263e" if is_dark else "\u2600"
 _theme_label = "LIGHT" if is_dark else "DARK"
 
-st.markdown(
-    f"""
-<div class="top-toolbar">
-    <button onclick="
-        var url = new URL(window.location);
-        url.searchParams.set('theme_toggle', '1');
-        window.location.href = url.toString();
-    ">{_theme_icon} {_theme_label}</button>
-    <button onclick="window.print()">PRINT</button>
-</div>
-""",
-    unsafe_allow_html=True,
-)
+_tb_spacer, _tb1, _tb2 = st.columns([8, 1, 1])
+with _tb1:
+    st.markdown('<div class="toolbar-btn">', unsafe_allow_html=True)
+    if st.button(_theme_label, key="toolbar_theme"):
+        st.session_state.theme = "light" if is_dark else "dark"
+        st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+with _tb2:
+    st.markdown('<div class="toolbar-btn">', unsafe_allow_html=True)
+    if st.button("PRINT", key="toolbar_print"):
+        st.components.v1.html("<script>window.parent.print();</script>", height=0)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Sidebar ──────────────────────────────────────────────────────────────
 
@@ -576,30 +581,26 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Mode selector (pure JS clickable cards, no hidden buttons) ───────────
+# ── Mode selector (st.button overlaid on HTML card visuals) ───────────────
 
-_cards_html_parts: list[str] = []
-for key in MODES:
+cols = st.columns(len(MODES))
+for i, key in enumerate(MODES):
     m = MODES[key]
     active = "active" if st.session_state.mode == key else ""
-    _cards_html_parts.append(
-        f'<div class="mode-card {m["css_class"]} {active}" '
-        f"""onclick="(function(){{ var u=new URL(window.location); """
-        f"""u.searchParams.set('set_mode','{key}'); """
-        f"""window.location.href=u.toString(); }})()" """
-        f'style="flex:1;min-width:0;">'
-        f'<div class="mc-icon">{m["icon"]}</div>'
-        f'<div class="mc-name">{m["name"]}</div>'
-        f'<div class="mc-sub">{m["sub"]}</div>'
-        f"</div>"
-    )
-
-st.markdown(
-    '<div style="display:flex;gap:8px;margin-bottom:0.5rem;">'
-    + "".join(_cards_html_parts)
-    + "</div>",
-    unsafe_allow_html=True,
-)
+    with cols[i]:
+        st.markdown(
+            f'<div class="mode-card-wrapper {m["css_class"]} {active}">'
+            f'<div class="card-visual">'
+            f'<div class="mc-icon">{m["icon"]}</div>'
+            f'<div class="mc-name">{m["name"]}</div>'
+            f'<div class="mc-sub">{m["sub"]}</div>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+        if st.button(" ", key=f"mode_{key}", use_container_width=True) and st.session_state.mode != key:
+            st.session_state.mode = key
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Resolve active mode ─────────────────────────────────────────────────
 

@@ -274,7 +274,6 @@ def serve(
             str(web_path),
             f"--server.address={host}",
             f"--server.port={port}",
-            "--server.headless=true",
         ],
         check=False,
     )
