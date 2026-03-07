@@ -1,16 +1,26 @@
-"""Standalone launcher for the Polarity Agent Gradio UI.
+"""Standalone launcher for the Polarity Agent Streamlit UI.
 
 Run directly::
 
-    python app.py
+    streamlit run app.py
 
 Or via the CLI::
 
-    penggen serve --port 7860
+    penggen serve --port 8501
 """
 
-from polarity_agent.web import create_demo
+import subprocess
+import sys
+from pathlib import Path
+
+
+def main() -> None:
+    web_module = Path(__file__).resolve().parent / "src" / "polarity_agent" / "web.py"
+    subprocess.run(
+        [sys.executable, "-m", "streamlit", "run", str(web_module), "--server.port=8501"],
+        check=True,
+    )
+
 
 if __name__ == "__main__":
-    demo, launch_kwargs = create_demo()
-    demo.launch(server_name="0.0.0.0", server_port=7860, **launch_kwargs)
+    main()

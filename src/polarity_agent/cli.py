@@ -5,7 +5,7 @@ Subcommands
 chat      Interactive chat with a persona.
 list      Show available persona packs.
 duel      Pit two personas against each other.
-serve     Launch the Gradio web UI.
+serve     Launch the Streamlit web UI.
 install   Install community persona packs.
 
 Environment variables (set in .env or shell)
@@ -142,23 +142,30 @@ def _root(
 def chat(
     pack: str = typer.Option(
         lambda: os.environ.get("POLARITY_PACK", "advocatus"),
-        "--pack", "-p", help="Persona pack name. [env: POLARITY_PACK]",
+        "--pack",
+        "-p",
+        help="Persona pack name. [env: POLARITY_PACK]",
     ),
     provider: str = typer.Option(
         lambda: os.environ.get("POLARITY_PROVIDER", "ollama"),
-        "--provider", help="LLM provider. [env: POLARITY_PROVIDER]",
+        "--provider",
+        help="LLM provider. [env: POLARITY_PROVIDER]",
     ),
     model: str = typer.Option(
         lambda: os.environ.get("POLARITY_MODEL", "llama3"),
-        "--model", "-m", help="Model name. [env: POLARITY_MODEL]",
+        "--model",
+        "-m",
+        help="Model name. [env: POLARITY_MODEL]",
     ),
     base_url: str | None = typer.Option(
         lambda: os.environ.get("POLARITY_BASE_URL") or None,
-        "--base-url", help="Provider base URL. [env: POLARITY_BASE_URL]",
+        "--base-url",
+        help="Provider base URL. [env: POLARITY_BASE_URL]",
     ),
     api_key: str | None = typer.Option(
         lambda: os.environ.get("POLARITY_API_KEY") or None,
-        "--api-key", help="API key. [env: POLARITY_API_KEY]",
+        "--api-key",
+        help="API key. [env: POLARITY_API_KEY]",
     ),
     trace: bool = typer.Option(False, "--trace", help="Enable JSONL trace logging."),
 ) -> None:
@@ -205,20 +212,24 @@ def duel(
     ),
     provider: str = typer.Option(
         lambda: os.environ.get("POLARITY_PROVIDER", "ollama"),
-        "--provider", help="LLM provider. [env: POLARITY_PROVIDER]",
+        "--provider",
+        help="LLM provider. [env: POLARITY_PROVIDER]",
     ),
     model: str = typer.Option(
         lambda: os.environ.get("POLARITY_MODEL", "llama3"),
-        "--model", help="Model name. [env: POLARITY_MODEL]",
+        "--model",
+        help="Model name. [env: POLARITY_MODEL]",
     ),
     rounds: int = typer.Option(3, "--rounds", "-r", help="Number of rounds."),
     base_url: str | None = typer.Option(
         lambda: os.environ.get("POLARITY_BASE_URL") or None,
-        "--base-url", help="Provider base URL. [env: POLARITY_BASE_URL]",
+        "--base-url",
+        help="Provider base URL. [env: POLARITY_BASE_URL]",
     ),
     api_key: str | None = typer.Option(
         lambda: os.environ.get("POLARITY_API_KEY") or None,
-        "--api-key", help="API key. [env: POLARITY_API_KEY]",
+        "--api-key",
+        help="API key. [env: POLARITY_API_KEY]",
     ),
     trace: bool = typer.Option(False, "--trace", help="Enable JSONL trace logging."),
 ) -> None:
@@ -233,16 +244,20 @@ def duel(
 @app.command()
 def serve(
     host: str = typer.Option("0.0.0.0", "--host", help="Bind host."),
-    port: int = typer.Option(7860, "--port", help="Bind port."),
+    port: int = typer.Option(8501, "--port", help="Bind port."),
 ) -> None:
-    """Launch the Gradio web UI."""
+    """Launch the Streamlit web UI."""
+    import subprocess
+    import sys
+
     try:
-        from polarity_agent.web import create_demo
+        import streamlit  # noqa: F401
     except ImportError:
         console.print("[red]Web dependencies not installed.[/]")
         console.print("Run: [bold]pip install polarity-agent\\[web][/]")
         raise typer.Exit(1) from None
 
+    web_path = Path(__file__).resolve().parent / "web.py"
     console.print(
         Panel(
             f"Launching Polarity Agent Web UI\nhttp://{host}:{port}",
@@ -250,8 +265,19 @@ def serve(
             border_style="cyan",
         )
     )
-    demo, launch_kwargs = create_demo()
-    demo.launch(server_name=host, server_port=port, **launch_kwargs)
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "streamlit",
+            "run",
+            str(web_path),
+            f"--server.address={host}",
+            f"--server.port={port}",
+            "--server.headless=true",
+        ],
+        check=False,
+    )
 
 
 @install_app.command("pack")

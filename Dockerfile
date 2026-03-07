@@ -17,9 +17,10 @@ ENV POLARITY_PROVIDER=ollama \
     POLARITY_MODEL=llama3 \
     POLARITY_BASE_URL=http://host.docker.internal:11434
 
-EXPOSE 7860
+EXPOSE 8501
 
 HEALTHCHECK --interval=30s --timeout=5s \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7860/')" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')" || exit 1
 
-CMD ["uv", "run", "python", "app.py"]
+CMD ["uv", "run", "streamlit", "run", "src/polarity_agent/web.py", \
+     "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true"]

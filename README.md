@@ -98,7 +98,7 @@ penggen duel --mode praise-battle --topic "I deserve a raise" --rounds 3
 # Install web dependencies
 pip install -e ".[web,ollama]"
 
-# Launch Gradio UI on http://localhost:7860
+# Launch Streamlit UI on http://localhost:8501
 penggen serve
 ```
 
@@ -106,7 +106,7 @@ penggen serve
 
 ```bash
 docker build -t polarity-agent .
-docker run -p 7860:7860 polarity-agent
+docker run -p 8501:8501 polarity-agent
 ```
 
 ## Architecture
@@ -117,7 +117,7 @@ polarity-agent/
 │   ├── agent.py              # Core engine — stance-locked stateful chat
 │   ├── cli.py                # Typer + Rich CLI (penggen)
 │   ├── api.py                # FastAPI backend (/chat, /stream, /packs)
-│   ├── web.py                # Gradio frontend with cyberpunk aesthetic
+│   ├── web.py                # Streamlit frontend with cyberpunk aesthetic
 │   ├── tracing.py            # JSONL trace logger for session replay
 │   ├── providers/
 │   │   ├── base.py           # Abstract BaseProvider interface
@@ -135,7 +135,7 @@ polarity-agent/
 │   ├── test_agent.py
 │   ├── test_tracing.py
 │   └── ...                   # 87 tests total, 0 failures
-├── app.py                    # Gradio launcher
+├── app.py                    # Streamlit launcher
 ├── Dockerfile
 ├── AUP.md                    # "It's a joke machine, not a weapon"
 └── pyproject.toml
@@ -256,7 +256,7 @@ uv run ruff format .
 - [x] Provider abstraction (Ollama / OpenAI / LiteLLM)
 - [x] CLI with Rich typewriter effects
 - [x] Duel mode (troll-fight / praise-battle / court)
-- [x] Gradio Web UI with cyberpunk aesthetic
+- [x] Streamlit Web UI with cyberpunk aesthetic
 - [x] FastAPI backend (/chat, /stream)
 - [x] Docker support
 - [x] JSONL trace logging
