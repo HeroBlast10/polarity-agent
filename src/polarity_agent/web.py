@@ -39,7 +39,7 @@ MODES = {
     "advocatus": {
         "icon": "+",
         "name": "ADVOCATUS",
-        "sub": "\u62a4\u77ed\u6a21\u5f0f",
+        "sub": "\u6367\u54cf\u6a21\u5f0f",
         "desc": "UNCONDITIONAL SUPPORT",
         "quote": '"You are a visionary."',
         "color": "#39ff14",
