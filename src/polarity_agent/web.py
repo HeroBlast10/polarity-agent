@@ -228,89 +228,56 @@ div[data-testid="stHorizontalBlock"].toolbar-row {
     max-width: 700px;
 }
 
-/* ── Mode cards (st.button styled as card) ──── */
-.mode-card-wrapper {
-    position: relative;
+/* ── Mode cards (st.button IS the card) ─────── */
+.mode-btn-support button,
+.mode-btn-oppose button,
+.mode-btn-duel button {
+    border-radius: 12px !important;
+    padding: 0.7rem 0.3rem !important;
+    text-align: center !important;
+    transition: all 0.25s ease !important;
+    border: 2px solid transparent !important;
+    min-height: 100px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.72rem !important;
+    line-height: 1.6 !important;
+    white-space: pre-line !important;
+    color: var(--text-secondary) !important;
 }
-.mode-card-wrapper .card-visual {
-    border-radius: 12px;
-    padding: 0.8rem 0.5rem;
-    text-align: center;
-    transition: all 0.25s ease;
-    border: 2px solid transparent;
-    min-height: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
+.mode-btn-support button {
+    background: linear-gradient(135deg, var(--bg-card-s), var(--bg-card-s2)) !important;
+    border-color: color-mix(in srgb, var(--color-support) 30%, transparent) !important;
 }
-.mode-card-wrapper:hover .card-visual { transform: scale(1.03); }
-.mode-card-wrapper.support .card-visual {
-    background: linear-gradient(135deg, var(--bg-card-s), var(--bg-card-s2));
-    border-color: color-mix(in srgb, var(--color-support) 30%, transparent);
+.mode-btn-oppose button {
+    background: linear-gradient(135deg, var(--bg-card-o), var(--bg-card-o2)) !important;
+    border-color: color-mix(in srgb, var(--color-oppose) 30%, transparent) !important;
 }
-.mode-card-wrapper.oppose .card-visual {
-    background: linear-gradient(135deg, var(--bg-card-o), var(--bg-card-o2));
-    border-color: color-mix(in srgb, var(--color-oppose) 30%, transparent);
+.mode-btn-duel button {
+    background: linear-gradient(135deg, var(--bg-card-d), var(--bg-card-d2)) !important;
+    border-color: color-mix(in srgb, var(--color-duel) 30%, transparent) !important;
 }
-.mode-card-wrapper.duel .card-visual {
-    background: linear-gradient(135deg, var(--bg-card-d), var(--bg-card-d2));
-    border-color: color-mix(in srgb, var(--color-duel) 30%, transparent);
-}
-.mode-card-wrapper.active .card-visual { transform: scale(1.03); }
-.mode-card-wrapper.support.active .card-visual {
-    border-color: var(--color-support);
+.mode-btn-support button:hover { transform: scale(1.03); border-color: var(--color-support) !important; }
+.mode-btn-oppose button:hover { transform: scale(1.03); border-color: var(--color-oppose) !important; }
+.mode-btn-duel button:hover { transform: scale(1.03); border-color: var(--color-duel) !important; }
+.mode-btn-support.active button {
+    border-color: var(--color-support) !important;
     box-shadow: 0 0 20px color-mix(in srgb, var(--color-support) 18%, transparent),
-                inset 0 0 20px color-mix(in srgb, var(--color-support) 5%, transparent);
+                inset 0 0 20px color-mix(in srgb, var(--color-support) 5%, transparent) !important;
+    transform: scale(1.03);
 }
-.mode-card-wrapper.oppose.active .card-visual {
-    border-color: var(--color-oppose);
+.mode-btn-oppose.active button {
+    border-color: var(--color-oppose) !important;
     box-shadow: 0 0 20px color-mix(in srgb, var(--color-oppose) 18%, transparent),
-                inset 0 0 20px color-mix(in srgb, var(--color-oppose) 5%, transparent);
+                inset 0 0 20px color-mix(in srgb, var(--color-oppose) 5%, transparent) !important;
+    transform: scale(1.03);
 }
-.mode-card-wrapper.duel.active .card-visual {
-    border-color: var(--color-duel);
+.mode-btn-duel.active button {
+    border-color: var(--color-duel) !important;
     box-shadow: 0 0 20px color-mix(in srgb, var(--color-duel) 18%, transparent),
-                inset 0 0 20px color-mix(in srgb, var(--color-duel) 5%, transparent);
-}
-.card-visual .mc-icon { font-size: 1.3rem; margin-bottom: 0.15rem; }
-.card-visual .mc-name {
-    font-family: 'Orbitron', monospace;
-    font-weight: 700;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-}
-.mode-card-wrapper.support .mc-name { color: var(--color-support); }
-.mode-card-wrapper.oppose .mc-name { color: var(--color-oppose); }
-.mode-card-wrapper.duel .mc-name { color: var(--color-duel); }
-.card-visual .mc-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.58rem;
-    color: var(--text-secondary);
-    margin-top: 0.1rem;
-}
-/* Overlay st.button on top of card visual */
-.mode-card-wrapper button[kind="secondary"] {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    z-index: 2 !important;
-}
-.mode-card-wrapper div[data-testid="stButton"] {
-    position: absolute !important;
-    inset: 0 !important;
-}
-.mode-card-wrapper div[data-testid="stButton"] > button {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
+                inset 0 0 20px color-mix(in srgb, var(--color-duel) 5%, transparent) !important;
+    transform: scale(1.03);
 }
 
 /* ── Chat messages ──────────────────────────── */
@@ -581,23 +548,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Mode selector (st.button overlaid on HTML card visuals) ───────────────
+# ── Mode selector (st.button IS the card — no extra HTML needed) ──────────
+
+_mode_css_map = {"support": "mode-btn-support", "oppose": "mode-btn-oppose", "duel": "mode-btn-duel"}
 
 cols = st.columns(len(MODES))
 for i, key in enumerate(MODES):
     m = MODES[key]
-    active = "active" if st.session_state.mode == key else ""
+    active = " active" if st.session_state.mode == key else ""
+    css_cls = _mode_css_map.get(m["css_class"], "mode-btn-duel")
+    btn_label = f'{m["icon"]}\n{m["name"]}\n{m["sub"]}'
     with cols[i]:
-        st.markdown(
-            f'<div class="mode-card-wrapper {m["css_class"]} {active}">'
-            f'<div class="card-visual">'
-            f'<div class="mc-icon">{m["icon"]}</div>'
-            f'<div class="mc-name">{m["name"]}</div>'
-            f'<div class="mc-sub">{m["sub"]}</div>'
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-        if st.button(" ", key=f"mode_{key}", use_container_width=True) and st.session_state.mode != key:
+        st.markdown(f'<div class="{css_cls}{active}">', unsafe_allow_html=True)
+        if st.button(btn_label, key=f"mode_{key}", use_container_width=True) and st.session_state.mode != key:
             st.session_state.mode = key
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
