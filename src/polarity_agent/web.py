@@ -160,29 +160,28 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     background: linear-gradient(170deg, var(--bg-app-start) 0%, var(--bg-app-mid) 40%, var(--bg-app-end) 100%);
 }
 
-/* ── Top-right toolbar (Streamlit buttons) ──── */
-div[data-testid="stHorizontalBlock"].toolbar-row {
-    position: fixed;
-    top: 8px;
-    right: 16px;
-    z-index: 9999;
+/* ── Top-right toolbar row ──────────────────── */
+.toolbar-row {
+    margin-top: -0.5rem !important;
+    margin-bottom: -0.3rem !important;
 }
 .toolbar-btn button {
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.66rem !important;
+    font-size: 0.62rem !important;
     font-weight: 700 !important;
-    letter-spacing: 0.06em !important;
-    padding: 4px 10px !important;
-    border-radius: 6px !important;
+    letter-spacing: 0.08em !important;
+    padding: 3px 14px !important;
+    border-radius: 5px !important;
     border: 1px solid var(--border-cyan) !important;
-    background: var(--bg-input) !important;
+    background: transparent !important;
     color: var(--color-accent) !important;
     min-height: 0 !important;
     height: auto !important;
-    line-height: 1.4 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
 }
 .toolbar-btn button:hover {
-    box-shadow: 0 0 12px rgba(0,229,255,0.2) !important;
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent) !important;
 }
 
 /* ── Header ─────────────────────────────────── */
@@ -355,24 +354,26 @@ div[data-testid="stHorizontalBlock"].toolbar-row {
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, var(--bg-sidebar-start), var(--bg-sidebar-end)) !important;
     border-right: 1px solid var(--border-sidebar);
-    padding-top: 0.5rem !important;
 }
 section[data-testid="stSidebar"] > div:first-child {
-    padding-top: 0.5rem !important;
+    padding-top: 0.3rem !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stVerticalBlockBorderWrapper"] {
+    padding-top: 0 !important;
 }
 .sidebar-title {
     font-family: 'Orbitron', monospace;
     color: var(--color-accent);
     font-size: 0.74rem;
     letter-spacing: 0.1em;
-    margin-bottom: 0.4rem;
-    padding-bottom: 0.2rem;
+    margin-bottom: 0.3rem;
+    margin-top: 0;
+    padding-bottom: 0.15rem;
     border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
-/* Reduce sidebar hr spacing */
 section[data-testid="stSidebar"] hr {
-    margin-top: 0.5rem !important;
-    margin-bottom: 0.5rem !important;
+    margin-top: 0.3rem !important;
+    margin-bottom: 0.3rem !important;
 }
 
 /* ── Footer ─────────────────────────────────── */
@@ -450,12 +451,13 @@ st.markdown(f"<style>{theme_vars}\n{_CSS_COMMON}</style>", unsafe_allow_html=Tru
 
 # ── Top-right toolbar (theme + print) ─────────────────────────────────────
 
-_theme_label = "LIGHT" if is_dark else "DARK"
+_theme_icon = "\u263e" if is_dark else "\u2600"
 
-_tb_spacer, _tb1, _tb2 = st.columns([8, 1, 1])
+st.markdown('<div class="toolbar-row">', unsafe_allow_html=True)
+_tb_spacer, _tb1, _tb2 = st.columns([20, 2, 2])
 with _tb1:
     st.markdown('<div class="toolbar-btn">', unsafe_allow_html=True)
-    if st.button(_theme_label, key="toolbar_theme"):
+    if st.button(f"{_theme_icon} LIGHT" if is_dark else f"{_theme_icon} DARK", key="toolbar_theme"):
         st.session_state.theme = "light" if is_dark else "dark"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
@@ -464,6 +466,7 @@ with _tb2:
     if st.button("PRINT", key="toolbar_print"):
         st.components.v1.html("<script>window.parent.print();</script>", height=0)
     st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Sidebar ──────────────────────────────────────────────────────────────
 
@@ -522,10 +525,12 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown('<div class="sidebar-title">// ABOUT</div>', unsafe_allow_html=True)
-    st.caption(
-        "Polarity Agent v0.1.0\n\n"
-        "Satirical framework for entertainment & logic-testing only. "
-        "Developers assume no liability."
+    st.markdown(
+        '<p style="font-size:0.72rem;color:var(--text-secondary);margin:0;">'
+        "Polarity Agent v0.1.0<br>"
+        "Satirical framework for entertainment &amp; logic-testing only. "
+        "Developers assume no liability.</p>",
+        unsafe_allow_html=True,
     )
 
 # ── Header ───────────────────────────────────────────────────────────────
