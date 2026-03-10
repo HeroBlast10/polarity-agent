@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="logo.png" alt="Polarity.ai — Shield & Sword" width="120" />
+
 # Polarity.ai
 
 ### The Anti-Alignment AI Agent that **PROVES** you are right (or **DESTROYS** your logic).
