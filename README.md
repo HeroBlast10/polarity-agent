@@ -102,6 +102,32 @@ pip install -e ".[web,ollama]"
 polarity serve
 ```
 
+### Production Web UI (Next.js + Vercel)
+
+For a polished production-ready frontend, see the separate [polarity-web](https://github.com/HeroBlast10/polarity-web) repository:
+
+```bash
+# Clone the frontend
+git clone https://github.com/HeroBlast10/polarity-web.git
+cd polarity-web
+
+# Configure environment variables
+# - DEFAULT_PROVIDER: "openai", "ollama", or "litellm"
+# - DEFAULT_MODEL: model name (e.g., "gpt-4o-mini", "llama3")
+# - DEFAULT_API_KEY: your API key
+
+# Deploy to Vercel
+vercel
+```
+
+The frontend includes:
+- Modern Next.js + React + Tailwind CSS interface
+- Real-time streaming chat
+- Theme toggle (cyberpunk aesthetic)
+- Pack selection (Advocatus / Inquisitor)
+
+**Live Demo:** https://polarity-web-two.vercel.app
+
 ### Docker (One-Click-er)
 
 ```bash
