@@ -250,18 +250,6 @@ uv run ruff check .
 uv run ruff format .
 ```
 
-## Roadmap
-
-- [x] Advocatus & Inquisitor built-in packs
-- [x] Provider abstraction (Ollama / OpenAI / LiteLLM)
-- [x] CLI with Rich typewriter effects
-- [x] Duel mode (troll-fight / praise-battle / court)
-- [x] Streamlit Web UI with cyberpunk aesthetic
-- [x] FastAPI backend (/chat, /stream)
-- [x] Docker support
-- [x] JSONL trace logging
-- [x] Red-team test suite (32 assertions)
-
 ## Legal
 
 This project is licensed under [MIT](LICENSE). See [AUP.md](AUP.md) for the Acceptable Use Policy.
