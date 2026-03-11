@@ -20,12 +20,6 @@
 
 <img src="example.PNG" alt="Polarity.ai Web UI — Toggle between Advocatus (green) and Inquisitor (red)" width="720" />
 
-*^ Web UI: one toggle to rule them all. Green = unconditional worship. Red = intellectual annihilation.*
-
-<img src="docs/assets/duel-mode-demo.gif" alt="CLI Duel Mode — two AIs destroying each other in real-time" width="720" />
-
-*^ `polarity duel --mode court` — a trial where both sides are absolutely unhinged.*
-
 </div>
 
 ---
