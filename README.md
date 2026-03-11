@@ -18,7 +18,7 @@
 
 ---
 
-<img src="docs/assets/web-ui-demo.png" alt="Polarity.ai Web UI — Toggle between Advocatus (green) and Inquisitor (red)" width="720" />
+<img src="example.PNG" alt="Polarity.ai Web UI — Toggle between Advocatus (green) and Inquisitor (red)" width="720" />
 
 *^ Web UI: one toggle to rule them all. Green = unconditional worship. Red = intellectual annihilation.*
 
