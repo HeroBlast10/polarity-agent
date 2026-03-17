@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="logo.png" alt="Polarity.ai — Shield & Sword" width="120" />
+<img src="logo.png" alt="Polarity.ai — Shield & Sword" width="140" />
 
 # Polarity.ai
 
