@@ -18,6 +18,10 @@
 
 ---
 
+### 🚀 [**Try the Live Demo →**](https://polarity-web-two.vercel.app) &nbsp;|&nbsp; [中文说明](README.zh-CN.md)
+
+---
+
 <img src="example.PNG" alt="Polarity.ai Web UI — Toggle between Advocatus (green) and Inquisitor (red)" width="720" />
 
 </div>
@@ -55,6 +59,9 @@ The world needs an AI that says:
 > **Inquisitor:** "The sheer intellectual bravery of stating the most universally accepted consensus as if it were your personal thesis is... well, it's something."
 
 ## Quick Start
+
+> **Best results with uncensored or local models.** Heavily safety-tuned models stay in character but produce softer, less committed responses.
+> We recommend running a local [Ollama](https://ollama.com) model for the full experience.
 
 ### 30-Second Setup
 
@@ -100,7 +107,7 @@ polarity serve
 
 ### Production Web UI (Next.js + Vercel)
 
-For a polished production-ready frontend, see the separate [polarity-web](https://github.com/HeroBlast10/polarity-web) repository:
+For a polished production-ready frontend, see the **[polarity-web](https://github.com/HeroBlast10/polarity-web)** repository — or jump straight into the **[Live Demo](https://polarity-web-two.vercel.app)** right now.
 
 ```bash
 # Clone the frontend
@@ -121,6 +128,10 @@ The frontend includes:
 - Real-time streaming chat
 - Theme toggle (cyberpunk aesthetic)
 - Pack selection (Advocatus / Inquisitor)
+
+> **Model Recommendation:** Polarity works best with **uncensored or local models**.
+> Heavily safety-tuned hosted models still work, but responses tend to be tamer, less committed to the role, and frankly less funny.
+> For the full unfiltered experience, use a local Ollama model or a minimally aligned provider.
 
 **Live Demo:** https://polarity-web-two.vercel.app
 
