@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="logo.png" alt="Polarity.ai — Shield & Sword" width="120" />
+<img src="banner.png" alt="Polarity.ai — 盾与剑" width="1000" />
 
 # Polarity.ai
 
@@ -94,6 +94,8 @@ polarity duel --mode troll-fight --topic "1+1=2" --rounds 3
 # PRAISE BATTLE — two yes-men competing to out-flatter each other
 polarity duel --mode praise-battle --topic "I deserve a raise" --rounds 3
 ```
+
+<img src="court mode_en.png" alt="court-mode" width="1000" />
 
 ### Web UI (One-Click)
 
@@ -304,5 +306,7 @@ We are not responsible for what the machine says — or what you choose to belie
 ---
 
 **Star this repo if you believe balanced AI is boring.**
+
+<img src="logo.png" alt="Polarity.ai — 盾与剑" width="120" />
 
 </div>

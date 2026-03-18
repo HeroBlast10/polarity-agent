@@ -96,6 +96,8 @@ polarity duel --mode troll-fight --topic "1+1=2" --rounds 3
 polarity duel --mode praise-battle --topic "我应该加薪" --rounds 3
 ```
 
+<img src="court mode_zh.png" alt="court-mode" width="1000" />
+
 ### Web UI（一键启动）
 
 ```bash
