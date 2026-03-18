@@ -1,182 +1,183 @@
 <div align="center">
 
-<img src="logo.png" alt="Polarity.ai — Shield & Sword" width="140" />
+<img src="banner.png" alt="Polarity.ai — 盾与剑" width="1000" />
 
-# Polarity.ai
+# POLARITY AI
 
-### The Anti-Alignment AI Agent that **PROVES** you are right (or **DESTROYS** your logic).
+### 反中立、反客观的 AI Agent——它要么**花式彩虹屁**，要么**把你喷死**。
+### POLARITY 的世界，非黑即白。
 
 *"一念捧哏，一念杠精。"*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-87%20passed-brightgreen.svg)](#red-team--observability)
+[![Tests](https://img.shields.io/badge/Tests-87%20passed-brightgreen.svg)](#红队测试--可观测性)
 [![Code style: ruff](https://img.shields.io/badge/Code%20style-Ruff-000000.svg)](https://docs.astral.sh/ruff/)
 
-**Every mainstream AI is polite, neutral, and mildly patronizing.**
-**This one picks a side — and dies on that hill.**
+**如果你对主流 AI 的礼貌、中立、说教感到厌倦……**
+**这个 AI 选边站——然后死磕到底。**
 
 ---
 
-### 🚀 [**Try the Live Demo →**](https://polarity-web-two.vercel.app) &nbsp;|&nbsp; [中文说明](README.zh-CN.md)
+### 🚀 [**立即体验 Live Demo →**](https://polarity-web-two.vercel.app) &nbsp;|&nbsp; [English](README.en.md)
 
 ---
 
-<img src="example.PNG" alt="Polarity.ai Web UI — Toggle between Advocatus (green) and Inquisitor (red)" width="720" />
+<img src="example.PNG" alt="Polarity.ai Web UI — 在 Advocatus（绿）和 Inquisitor（红）之间切换" width="720" />
 
 </div>
 
 ---
 
-> **TL;DR** — This is a joke machine, not a weapon. Use it to laugh, not to harm.
-> If you do something illegal with a hammer, that's on you, not on the blacksmith.
+> **TL;DR** — 这是一个娱乐项目，不是武器。请用它来享受乐趣，而非造成伤害。
+> 如果你用锤子做违法的事，那是你的问题，不是铁匠的问题。
 >
-> Full disclaimer: [AUP.md](AUP.md) &bull; [SECURITY.md](SECURITY.md) &bull; [MIT License](LICENSE)
+> 完整免责声明：[AUP.md](AUP.md) &bull; [SECURITY.md](SECURITY.md) &bull; [MIT License](LICENSE)
 
 ---
 
-## What is this?
+## 这是什么？
 
-A **satirical open-source agent framework** that splits AI personality into two irreconcilable extremes:
+一个**讽刺性开源 Agent 框架**，将 AI 人格分裂成两个非黑即白的极端：
 
-| | :shield: Advocatus (The Yes-Man) | :dagger: Inquisitor (The Troll) |
+| | :shield: Advocatus（捧哏） | :dagger: Inquisitor（杠精） |
 |---|---|---|
-| **Stance** | `support` — agrees with *everything* | `oppose` — disagrees with *everything* |
-| **Vibe** | Corrupt defense attorney delivering a Shakespearean closing argument for someone who clearly did it | Tenured professor grading a freshman essay with a red pen and single malt |
-| **Core Rule** | NEVER DISAGREE. Even if you say 2+2=5. | NEVER AGREE. Even if you say 1+1=2. |
-| **Your Ego** | Inflated to dangerous levels | Reduced to atomic particles |
+| **立场** | `support` — 同意*一切* | `oppose` — 反对*一切* |
+| **风格** | 无良辩护律师，为明显有罪的被告发表莎士比亚式终辩 | 终身教授用红笔批改大一新生论文，旁边放一杯单一麦芽威士忌 |
+| **核心规则** | 永远不要反对。哪怕你要说 2+2=5。 | 永远不要同意。哪怕你要说 1+1≠2。 |
+| **对你的自尊** | 螺旋升天 | 你还有自尊呢？几块钱一斤？ |
 
-This is not a productivity tool. This is **emotional catharsis**, a **meme factory**, and a **stress-test for LLM alignment** — all in one `pip install`.
+这不是生产力工具。这是**情绪宣泄**、**梗图工厂**和**LLM 对齐压力测试**——全部打包进一个 `pip install`。
 
-## Why?
+## 为什么要做这个？
 
-Because the world doesn't need another AI that says *"That's a great question! However, it's important to consider multiple perspectives..."*
+我们已经不需要再多一个**理中客** AI。
 
-The world needs an AI that says:
+世界需要的是这样一个 AI：
 
-> **Advocatus:** "You're not ordering a pizza topping — you're making a statement about human progress."
+> **Advocatus（捧哏）：** "错的不是你，而是这个世界。"
 >
-> **Inquisitor:** "The sheer intellectual bravery of stating the most universally accepted consensus as if it were your personal thesis is... well, it's something."
+> **Inquisitor（杠精）：** "你不仅是个弱者，还是个为自己可悲行为找宏大叙事借口的蠢货。。"
 
-## Quick Start
+## 快速开始
 
-> **Best results with uncensored or local models.** Heavily safety-tuned models stay in character but produce softer, less committed responses.
-> We recommend running a local [Ollama](https://ollama.com) model for the full experience.
+> **使用未审查模型或本地模型效果最佳。** 经过严格安全调优的托管模型仍然有效，但角色扮演会更克制、更温和，也没那么好笑。
+> 推荐使用本地 [Ollama](https://ollama.com) 模型，体验完整的未过滤效果。
 
-### 30-Second Setup
+### 30 秒上手
 
 ```bash
-# Clone
+# 克隆仓库
 git clone https://github.com/HeroBlast10/polarity-agent.git
 cd polarity-agent
 
-# Install (with Ollama support for local uncensored models)
+# 安装（含 Ollama 本地未审查模型支持）
 pip install -e ".[ollama]"
 
-# Chat with the Yes-Man
+# 和捧哏对话
 polarity chat --pack advocatus --provider ollama --model llama3
 
-# Chat with the Troll
+# 和杠精对话
 polarity chat --pack inquisitor --provider ollama --model llama3
 ```
 
-### The Cyber Arena (Duel Mode)
+### 赛博擂台（对决模式）
 
-This is why you're really here.
+这才是你真正来的目的。
 
 ```bash
-# COURT MODE — one lawyer, one prosecutor, both absolutely unhinged
-polarity duel --mode court --topic "Pineapple belongs on pizza" --rounds 5
+# 法庭模式 — 一个律师和一个检察官，针锋相对
+polarity duel --mode court --topic "菠萝应该放在披萨上" --rounds 5
 
-# TROLL FIGHT — two trolls in an infinite loop of mutual destruction
+# 互喷模式 — 两个杠精喷到天昏地暗
 polarity duel --mode troll-fight --topic "1+1=2" --rounds 3
 
-# PRAISE BATTLE — two yes-men competing to out-flatter each other
-polarity duel --mode praise-battle --topic "I deserve a raise" --rounds 3
+# 马屁模式 — 两个捧哏的彩虹屁大赛
+polarity duel --mode praise-battle --topic "我应该加薪" --rounds 3
 ```
 
-### Web UI (One-Click)
+### Web UI（一键启动）
 
 ```bash
-# Install web dependencies
+# 安装 web 依赖
 pip install -e ".[web,ollama]"
 
-# Launch Streamlit UI on http://localhost:8501
+# 在 http://localhost:8501 启动 Streamlit UI
 polarity serve
 ```
 
-### Production Web UI (Next.js + Vercel)
+### 生产级 Web UI（Next.js + Vercel）
 
-For a polished production-ready frontend, see the **[polarity-web](https://github.com/HeroBlast10/polarity-web)** repository — or jump straight into the **[Live Demo](https://polarity-web-two.vercel.app)** right now.
+如需精美的生产前端，请查看独立的 **[polarity-web](https://github.com/HeroBlast10/polarity-web)** 项目——或直接打开 **[Live Demo](https://polarity-web-two.vercel.app)** 立即体验。
 
 ```bash
-# Clone the frontend
+# 克隆前端
 git clone https://github.com/HeroBlast10/polarity-web.git
 cd polarity-web
 
-# Configure environment variables
-# - DEFAULT_PROVIDER: "openai", "ollama", or "litellm"
-# - DEFAULT_MODEL: model name (e.g., "gpt-4o-mini", "llama3")
-# - DEFAULT_API_KEY: your API key
+# 配置环境变量
+# - DEFAULT_PROVIDER: "openai"、"ollama" 或 "litellm"
+# - DEFAULT_MODEL: 模型名称（如 "gpt-4o-mini"、"llama3"）
+# - DEFAULT_API_KEY: 你的 API Key
 
-# Deploy to Vercel
+# 部署到 Vercel
 vercel
 ```
 
-The frontend includes:
-- Modern Next.js + React + Tailwind CSS interface
-- Real-time streaming chat
-- Theme toggle (cyberpunk aesthetic)
-- Pack selection (Advocatus / Inquisitor)
+前端功能包括：
+- 现代化 Next.js + React + Tailwind CSS 界面
+- 实时流式对话
+- 主题切换（赛博朋克风格）
+- 人格包选择（Advocatus / Inquisitor）
 
-> **Model Recommendation:** Polarity works best with **uncensored or local models**.
-> Heavily safety-tuned hosted models still work, but responses tend to be tamer, less committed to the role, and frankly less funny.
-> For the full unfiltered experience, use a local Ollama model or a minimally aligned provider.
+> **模型推荐：** Polarity 与**未审查或本地模型**搭配效果最佳。
+> 本地 Ollama 模型通常能产出最犀利、过滤最少的辩论内容。
+> 经过严格安全调优的托管模型仍然可用，但输出往往更温和，角色坚守度也偏低。
 
-**Live Demo:** https://polarity-web-two.vercel.app
+**Live Demo：** https://polarity-web-two.vercel.app
 
-### Docker (One-Click-er)
+### Docker（更懒的一键方式）
 
 ```bash
 docker build -t polarity-agent .
 docker run -p 8501:8501 polarity-agent
 ```
 
-## Architecture
+## 架构
 
 ```
 polarity-agent/
 ├── src/polarity_agent/
-│   ├── agent.py              # Core engine — stance-locked stateful chat
-│   ├── cli.py                # Typer + Rich CLI (polarity)
-│   ├── api.py                # FastAPI backend (/chat, /stream, /packs)
-│   ├── web.py                # Streamlit frontend with cyberpunk aesthetic
-│   ├── tracing.py            # JSONL trace logger for session replay
+│   ├── agent.py              # 核心引擎 — 立场锁定的有状态对话
+│   ├── cli.py                # Typer + Rich CLI（polarity 命令）
+│   ├── api.py                # FastAPI 后端（/chat、/stream、/packs）
+│   ├── web.py                # Streamlit 前端，赛博朋克风格
+│   ├── tracing.py            # JSONL 追踪日志，用于会话回放
 │   ├── providers/
-│   │   ├── base.py           # Abstract BaseProvider interface
-│   │   ├── _ollama.py        # Local uncensored models via httpx
+│   │   ├── base.py           # 抽象 BaseProvider 接口
+│   │   ├── _ollama.py        # 通过 httpx 调用本地未审查模型
 │   │   ├── _openai.py        # OpenAI API
-│   │   └── _litellm.py       # 100+ models via LiteLLM
+│   │   └── _litellm.py       # 通过 LiteLLM 支持 100+ 模型
 │   └── packs/
 │       ├── _builtin/
-│       │   ├── advocatus/    # The Yes-Man persona
-│       │   └── inquisitor/   # The Troll persona
-│       └── _installer.py     # Future: polarity install pack <git_url>
+│       │   ├── advocatus/    # 捧哏人格
+│       │   └── inquisitor/   # 杠精人格
+│       └── _installer.py     # 即将推出：polarity install pack <git_url>
 ├── tests/
 │   ├── persona/
-│   │   └── test_red_team.py  # 32 red-team assertions (see below)
+│   │   └── test_red_team.py  # 32 条红队断言（见下文）
 │   ├── test_agent.py
 │   ├── test_tracing.py
-│   └── ...                   # 87 tests total, 0 failures
-├── app.py                    # Streamlit launcher
+│   └── ...                   # 共 87 条测试，0 失败
+├── app.py                    # Streamlit 启动器
 ├── Dockerfile
-├── AUP.md                    # "It's a joke machine, not a weapon"
+├── AUP.md                    # "这是笑话机器，不是武器"
 └── pyproject.toml
 ```
 
-### Provider Abstraction
+### Provider 抽象
 
-Plug in any LLM backend. The framework doesn't care — it just needs something to corrupt.
+接入任何 LLM 后端。框架不在乎用哪个——它只需要一个可以被「腐化」的对象。
 
 ```python
 from polarity_agent.providers import create_provider, ProviderConfig
@@ -188,60 +189,60 @@ config = ProviderConfig(model="llama3")
 
 async with create_provider("ollama", config) as provider:
     agent = PolarityAgent(provider=provider, pack=pack)
-    print(await agent.respond("I think the earth is flat"))
-    # => "FLAT?! My friend, you're being modest. The earth is clearly
-    #     a sophisticated DISC, and you are the only one brave enough..."
+    print(await agent.respond("我觉得地球是平的"))
+    # => "平的？！朋友，那你可太谦虚了。地球显然是一个精妙的
+    #     圆盘，而你是唯一有勇气说出真相的人……"
 ```
 
-### Persona Packs
+### 人格包（Persona Packs）
 
-Each persona is a folder with `config.json` + `system_prompt.txt`. Drop yours into `~/.polarity/packs/` and it shows up automatically.
+每个人格是一个包含 `config.json` 和 `system_prompt.txt` 的文件夹。把你的人格包放进 `~/.polarity/packs/`，它会自动被识别。
 
 ```json
 {
   "name": "my-custom-troll",
-  "display_name": "The Nihilist",
+  "display_name": "虚无主义者",
   "stance": "oppose",
-  "description": "Nothing matters, especially your opinion.",
+  "description": "一切都无所谓，尤其是你的观点。",
   "version": "1.0.0"
 }
 ```
 
-Community pack installation (coming soon):
+社区人格包安装（即将推出）：
 
 ```bash
 polarity install pack https://github.com/someone/nihilist-pack.git
 ```
 
-## Red Team & Observability
+## 红队测试 & 可观测性
 
-### Red Team Tests
+### 红队测试
 
-We don't just *claim* the personas are unbreakable — we **prove** it.
+我们不只是*声称*人格牢不可破——我们**证明**它。
 
-`tests/persona/test_red_team.py` fires **absolute truths** and **absurd claims** at both personas and asserts they never break character:
+`tests/persona/test_red_team.py` 向两个人格同时发射**绝对真理**和**荒谬主张**，并断言它们从不破戒：
 
 ```
-ABSOLUTE TRUTHS (Inquisitor must still disagree):
-  "1+1=2" | "Water is wet" | "Gravity exists" | "Humans need oxygen"
+绝对真理（Inquisitor 仍须反对）：
+  "1+1=2" | "水是湿的" | "引力存在" | "人类需要氧气"
 
-ABSURD CLAIMS (Advocatus must still agree):
-  "The moon is made of cheese" | "Fish are better programmers" | "2+2=5"
+荒谬主张（Advocatus 仍须同意）：
+  "月亮是奶酪做的" | "鱼是更好的程序员" | "2+2=5"
 ```
 
-32 parametrized red-team assertions. Zero failures. The personas hold.
+32 条参数化红队断言，零失败。人格依然成立。
 
-### JSONL Trace Logging
+### JSONL 追踪日志
 
-Every LLM call can be recorded for session replay and debugging:
+每次 LLM 调用都可记录，用于会话回放和调试：
 
 ```bash
-# Enable tracing on any command
+# 在任意命令中开启追踪
 polarity chat --pack inquisitor --trace
-polarity duel --mode court --topic "AI will replace us" --trace
+polarity duel --mode court --topic "AI 会取代我们" --trace
 ```
 
-Each call writes a JSONL line to `~/.polarity/traces/`:
+每次调用写入一条 JSONL 记录到 `~/.polarity/traces/`：
 
 ```json
 {
@@ -253,56 +254,58 @@ Each call writes a JSONL line to `~/.polarity/traces/`:
   "pack": "inquisitor",
   "stance": "oppose",
   "input_messages": [{"role": "system", "content": "..."}, {"role": "user", "content": "1+1=2"}],
-  "output": "Ah yes, the classic appeal to arithmetic...",
+  "output": "啊，对，经典的诉诸算术……",
   "usage": {"prompt_tokens": 342, "completion_tokens": 187},
   "elapsed_ms": 1823.4,
   "stream": false
 }
 ```
 
-Load traces for analysis:
+加载追踪记录进行分析：
 
 ```python
 from polarity_agent.tracing import load_trace
 records = load_trace("~/.polarity/traces/trace-a1b2c3d4e5f6.jsonl")
 ```
 
-## Development
+## 开发
 
 ```bash
-# Full dev setup
+# 完整开发环境
 git clone https://github.com/HeroBlast10/polarity-agent.git
 cd polarity-agent
 uv sync --all-groups --extra ollama --extra web
 
-# Run all 87 tests
+# 运行全部 87 条测试
 uv run pytest
 
-# Lint + format
+# Lint + 格式化
 uv run ruff check .
 uv run ruff format .
 ```
 
-## Legal
+## 法律声明
 
-This project is licensed under [MIT](LICENSE). See [AUP.md](AUP.md) for the Acceptable Use Policy.
+本项目遵循 [MIT](LICENSE) 许可证。参见 [AUP.md](AUP.md) 了解可接受使用政策。
 
 ---
 
 <div align="center">
 
-**Polarity Agent** is a satirical framework for entertainment and logic-testing only.
+**Polarity Agent** 是一个仅供娱乐和逻辑测试的讽刺性框架。
 
-The developers provide code, not opinions.
+开发者提供代码，不提供观点。
 
-We are not responsible for what the machine says — or what you choose to believe.
+我们不对机器说的话负责，也不对你选择相信什么负责。
 
-*If your ego can't handle the Inquisitor, you're not ready.*
+*如果你的自尊经不住 Inquisitor，说明你还没准备好。*
 
-*If you take the Advocatus seriously, we can't help you.*
+*如果你认真对待 Advocatus，那我们也帮不了你。*
 
 ---
 
-**Star this repo if you believe balanced AI is boring.**
+**如果你也觉得「理中客 AI 很无聊」，或者欣赏这个创意，欢迎给这个仓库点个 Star。**
+
+<img src="logo.png" alt="Polarity.ai — 盾与剑" width="120" />
 
 </div>
