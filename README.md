@@ -23,7 +23,7 @@
 
 ---
 
-<img src="example.PNG" alt="Polarity.ai Web UI — 在 Advocatus（绿）和 Inquisitor（红）之间切换" width="720" />
+<img src="example_zh.PNG" alt="Polarity.ai Web UI — 在 Advocatus（绿）和 Inquisitor（红）之间切换" width="720" />
 
 </div>
 
