@@ -124,8 +124,8 @@ POLARITY_PACK=advocatus
 
 ```bash
 polarity serve
-# Open http://localhost:8501 in your browser
-# Set Provider / Model / API Key in the left sidebar and start chatting
+# Open http://localhost:7860 in your browser
+# Click Settings to configure Provider / Model / API Key and start chatting
 ```
 
 **CLI Chat**
@@ -163,7 +163,7 @@ polarity duel --mode praise-battle --topic "I deserve a raise" --rounds 3
 # Install web dependencies
 pip install -e ".[web,ollama]"
 
-# Launch Streamlit UI on http://localhost:8501
+# Launch Web UI (FastAPI + Vanilla HTML/JS) on http://localhost:7860
 polarity serve
 ```
 
@@ -201,7 +201,7 @@ The frontend includes:
 
 ```bash
 docker build -t polarity-agent .
-docker run -p 8501:8501 polarity-agent
+docker run -p 7860:7860 polarity-agent
 ```
 
 ## Architecture
@@ -212,7 +212,7 @@ polarity-agent/
 │   ├── agent.py              # Core engine — stance-locked stateful chat
 │   ├── cli.py                # Typer + Rich CLI (polarity)
 │   ├── api.py                # FastAPI backend (/chat, /stream, /packs)
-│   ├── web.py                # Streamlit frontend with cyberpunk aesthetic
+│   ├── server.py             # FastAPI + Vanilla HTML/JS Web UI
 │   ├── tracing.py            # JSONL trace logger for session replay
 │   ├── providers/
 │   │   ├── base.py           # Abstract BaseProvider interface
@@ -230,7 +230,7 @@ polarity-agent/
 │   ├── test_agent.py
 │   ├── test_tracing.py
 │   └── ...                   # 87 tests total, 0 failures
-├── app.py                    # Streamlit launcher
+├── app.py                    # Web UI launcher
 ├── Dockerfile
 ├── AUP.md                    # "It's a joke machine, not a weapon"
 └── pyproject.toml

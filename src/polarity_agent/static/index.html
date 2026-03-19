@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polarity.AI — The Anti-Alignment Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--bg-card:#0f0f0f;--bg-card-hover:#151515;--bg-elevated:#111;
+  --text:#fff;--text-dim:#888;--text-muted:#444;
+  --border:#222;--border-active:#fff;
+  --green:#22c55e;--red:#ef4444;--yellow:#eab308;
+  --font-mono:'JetBrains Mono',monospace;
+  --font-serif:'Instrument Serif',serif;
+  --font-body:'Playfair Display',serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-mono);overflow-x:hidden}
+body{
+  background-image:linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;background:none}
+input,select,textarea{font-family:inherit;outline:none}
+textarea{resize:none}
+a{color:inherit;text-decoration:none}
+.hidden{display:none!important}
+
+/* ── Pages ───────────────────────────────────────────────────── */
+.page{min-height:100vh;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Modal Overlay ───────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+  z-index:1000;display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .2s ease;
+}
+.modal-box{
+  background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:16px;padding:2rem;width:min(480px,95vw);
+  max-height:90vh;overflow-y:auto;
+}
+.modal-header{margin-bottom:1.8rem}
+.modal-title{font-family:var(--font-serif);font-size:2rem;color:var(--text);font-weight:400}
+.modal-sub{font-size:.72rem;color:var(--text-dim);letter-spacing:.05em;margin-top:.3rem}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:.68rem;color:var(--text-dim);letter-spacing:.1em;margin-bottom:.45rem}
+.field input,.field select{
+  width:100%;padding:.7rem .9rem;background:#0a0a0a;border:1px solid var(--border);
+  color:var(--text);border-radius:8px;font-size:.85rem;
+  transition:border-color .2s;
+}
+.field input:focus,.field select:focus{border-color:var(--border-active)}
+.field select option{background:#111}
+.modal-actions{display:flex;gap:.8rem;margin-top:1.5rem}
+.btn-primary{
+  flex:1;padding:.7rem 1.2rem;background:var(--text);color:var(--bg);
+  border-radius:50px;font-size:.72rem;font-weight:700;letter-spacing:.15em;
+  transition:opacity .2s;
+}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{
+  flex:1;padding:.7rem 1.2rem;background:transparent;color:var(--text);
+  border:1px solid var(--border);border-radius:50px;font-size:.72rem;
+  letter-spacing:.1em;transition:border-color .2s,background .2s;
+}
+.btn-secondary:hover{border-color:var(--border-active);background:rgba(255,255,255,.04)}
+.status-msg{
+  margin-top:.9rem;font-size:.7rem;padding:.55rem .85rem;border-radius:6px;
+  border:1px solid;letter-spacing:.05em;
+}
+.status-ok{border-color:#22c55e44;background:#22c55e11;color:#22c55e}
+.status-err{border-color:#ef444444;background:#ef444411;color:#ef4444}
+
+/* ── Home Page ───────────────────────────────────────────────── */
+#page-home{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem 1.5rem 4rem;min-height:100vh;
+}
+.home-logo{margin-bottom:2.5rem;opacity:.95}
+.home-logo svg{width:70px;height:82px}
+.home-eyebrow{
+  font-size:.65rem;letter-spacing:.4em;color:var(--text-dim);
+  text-transform:uppercase;margin-bottom:.8rem;
+}
+.home-title{
+  font-family:var(--font-serif);font-size:clamp(3rem,10vw,6rem);
+  letter-spacing:.35em;color:var(--text);line-height:1;
+  margin-bottom:1.2rem;text-align:center;font-weight:400;
+}
+.home-tagline{
+  font-family:var(--font-body);font-size:1.15rem;color:var(--text);
+  text-align:center;margin-bottom:.5rem;line-height:1.6;
+}
+.home-tagline .c-green{color:var(--green)}
+.home-tagline .c-red{color:var(--red)}
+.home-sub{
+  font-family:var(--font-body);font-size:1rem;color:var(--text-dim);
+  text-align:center;margin-bottom:2.5rem;
+}
+.home-btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:3.5rem}
+.btn-github{
+  display:flex;align-items:center;gap:.55rem;padding:.7rem 1.4rem;
+  border:1px solid #333;border-radius:50px;font-size:.8rem;color:var(--text-dim);
+  transition:border-color .2s,color .2s;
+}
+.btn-github:hover{border-color:var(--border-active);color:var(--text)}
+.btn-demo{
+  display:flex;align-items:center;gap:.55rem;padding:.7rem 1.6rem;
+  background:var(--text);border-radius:50px;font-size:.8rem;color:var(--bg);
+  font-weight:600;transition:opacity .2s;
+}
+.btn-demo:hover{opacity:.85}
+
+/* ── Mode Cards ──────────────────────────────────────────────── */
+.mode-cards{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:1.2rem;width:min(680px,100%);
+}
+.mode-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:16px;padding:2.2rem 1.8rem 1.8rem;
+  display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;transition:border-color .25s,background .25s,transform .2s;
+}
+.mode-card:hover{
+  border-color:rgba(255,255,255,.3);background:var(--bg-card-hover);
+  transform:translateY(-4px);
+}
+.card-icon{
+  width:52px;height:52px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;margin-bottom:1.3rem;font-size:1.5rem;
+}
+.card-icon.green{background:rgba(34,197,94,.12);color:var(--green)}
+.card-icon.red{background:rgba(239,68,68,.12);color:var(--red)}
+.card-title{font-size:1.05rem;font-weight:600;color:var(--text);margin-bottom:1.2rem}
+.card-key-btn{
+  display:flex;align-items:center;gap:.4rem;padding:.5rem 1rem;
+  border:1px solid #2a2a2a;border-radius:50px;font-size:.72rem;
+  color:var(--text-dim);background:transparent;
+  transition:border-color .2s,color .2s;
+}
+.card-key-btn:hover{border-color:#555;color:var(--text)}
+
+/* ── App Shell (Chat / Duel) ─────────────────────────────────── */
+.app-page{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.top-bar{
+  display:flex;align-items:center;padding:.9rem 1.4rem;
+  border-bottom:1px solid var(--border);background:rgba(0,0,0,.9);
+  backdrop-filter:blur(8px);position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.top-back{
+  display:flex;align-items:center;gap:.5rem;font-size:.7rem;
+  letter-spacing:.12em;color:var(--text-dim);padding:.45rem .8rem;
+  border:1px solid var(--border);border-radius:50px;
+  transition:border-color .2s,color .2s;margin-right:1rem;
+}
+.top-back:hover{border-color:var(--border-active);color:var(--text)}
+.top-title{
+  font-family:var(--font-mono);font-size:.75rem;letter-spacing:.25em;
+  color:var(--text);font-weight:700;flex:1;text-align:center;
+}
+.top-settings{
+  padding:.45rem .8rem;border:1px solid var(--border);border-radius:50px;
+  font-size:.7rem;letter-spacing:.1em;color:var(--text-dim);
+  transition:border-color .2s,color .2s;
+}
+.top-settings:hover{border-color:var(--border-active);color:var(--text)}
+
+/* ── Mode Tabs ───────────────────────────────────────────────── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0}
+.tab{
+  flex:1;padding:.75rem 1rem;font-size:.65rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--text-dim);border-bottom:2px solid transparent;
+  margin-bottom:-1px;text-align:center;transition:color .2s,border-color .2s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--text)}
+
+/* ── Messages Area ───────────────────────────────────────────── */
+.messages{flex:1;overflow-y:auto;padding:1.2rem;scroll-behavior:smooth}
+.messages::-webkit-scrollbar{width:4px}
+.messages::-webkit-scrollbar-track{background:transparent}
+.messages::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+
+.msg{margin-bottom:1rem;animation:fadeIn .2s ease}
+.msg-user{display:flex;justify-content:flex-end}
+.msg-user .msg-bubble{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px 12px 2px 12px;max-width:72%;padding:.85rem 1.1rem;
+}
+.msg-assistant .msg-bubble{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:2px 12px 12px 12px;max-width:80%;padding:.85rem 1.1rem;
+}
+.msg-label{
+  font-size:.58rem;letter-spacing:.14em;color:var(--text-dim);
+  margin-bottom:.45rem;text-transform:uppercase;
+}
+.msg-label.green{color:var(--green)}
+.msg-label.red{color:var(--red)}
+.msg-content{
+  font-family:var(--font-body);font-size:.92rem;line-height:1.8;
+  color:var(--text);white-space:pre-wrap;word-break:break-word;
+}
+.msg-meta{font-size:.55rem;color:var(--text-muted);margin-top:.5rem;letter-spacing:.05em}
+.msg-typing .msg-content::after{
+  content:'▋';animation:blink .8s steps(1) infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.round-divider{
+  text-align:center;font-size:.6rem;letter-spacing:.3em;color:var(--text-dim);
+  padding:.8rem 0;border-bottom:1px solid var(--border);margin-bottom:1rem;
+}
+
+/* ── Input Bar ───────────────────────────────────────────────── */
+.input-bar{
+  display:flex;gap:.7rem;padding:.9rem 1.2rem;
+  border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;
+}
+.input-bar textarea{
+  flex:1;padding:.75rem 1rem;background:#0a0a0a;border:1px solid var(--border);
+  color:var(--text);border-radius:10px;font-size:.88rem;line-height:1.5;
+  max-height:120px;min-height:44px;transition:border-color .2s;
+}
+.input-bar textarea:focus{border-color:#555}
+.input-bar textarea::placeholder{color:var(--text-muted)}
+.send-btn{
+  align-self:flex-end;padding:.7rem 1.3rem;background:var(--text);color:var(--bg);
+  border-radius:10px;font-size:.72rem;font-weight:700;letter-spacing:.12em;
+  flex-shrink:0;transition:opacity .2s;height:44px;
+}
+.send-btn:hover{opacity:.85}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Duel page extras ────────────────────────────────────────── */
+.duel-config{
+  padding:1rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;flex-shrink:0;
+}
+.duel-type-tabs{display:flex;gap:.4rem;flex-wrap:wrap}
+.duel-tab{
+  padding:.4rem .9rem;border:1px solid var(--border);border-radius:50px;
+  font-size:.65rem;letter-spacing:.12em;color:var(--text-dim);
+  transition:all .2s;
+}
+.duel-tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.duel-tab:hover:not(.active){border-color:#555;color:var(--text)}
+.duel-rounds{display:flex;align-items:center;gap:.5rem;margin-left:auto}
+.duel-rounds label{font-size:.65rem;color:var(--text-dim)}
+.duel-rounds input{
+  width:52px;padding:.35rem .5rem;background:#0a0a0a;border:1px solid var(--border);
+  color:var(--text);border-radius:6px;text-align:center;font-size:.82rem;
+}
+.duel-input-row{
+  display:flex;gap:.7rem;padding:.9rem 1.2rem;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.duel-input-row textarea{
+  flex:1;padding:.7rem 1rem;background:#0a0a0a;border:1px solid var(--border);
+  color:var(--text);border-radius:10px;font-size:.88rem;
+  transition:border-color .2s;min-height:44px;max-height:90px;
+}
+.duel-input-row textarea:focus{border-color:#555}
+.duel-input-row textarea::placeholder{color:var(--text-muted)}
+.duel-start-btn{
+  align-self:flex-end;padding:.7rem 1.3rem;background:var(--text);color:var(--bg);
+  border-radius:10px;font-size:.72rem;font-weight:700;letter-spacing:.12em;
+  flex-shrink:0;height:44px;transition:opacity .2s;
+}
+.duel-start-btn:hover{opacity:.85}
+.duel-start-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Loading spinner ─────────────────────────────────────────── */
+.spinner{
+  display:inline-block;width:14px;height:14px;border:2px solid #333;
+  border-top-color:var(--text);border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Error toast ─────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:9999;
+  background:#111;border:1px solid #ef444488;border-radius:10px;
+  padding:.8rem 1.2rem;font-size:.75rem;color:#ef4444;
+  animation:slideUp .25s ease;max-width:380px;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media(max-width:600px){
+  .mode-cards{grid-template-columns:1fr}
+  .home-title{letter-spacing:.15em}
+  .duel-type-tabs{gap:.3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─────────────────────────────────────────────────────────────
+     SETTINGS MODAL
+────────────────────────────────────────────────────────────────-->
+<div id="modal-settings" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Settings</div>
+      <div class="modal-sub">Configure your API provider and model</div>
+    </div>
+    <div class="field">
+      <label>PROVIDER</label>
+      <select id="cfg-provider">
+        <option value="ollama">Ollama (local)</option>
+        <option value="openai">OpenAI</option>
+        <option value="litellm">LiteLLM</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>MODEL</label>
+      <input id="cfg-model" type="text" placeholder="llama3 / gpt-4o / deepseek-chat">
+    </div>
+    <div class="field">
+      <label>API KEY</label>
+      <input id="cfg-apikey" type="password" placeholder="sk-...">
+    </div>
+    <div class="field">
+      <label>BASE URL</label>
+      <input id="cfg-baseurl" type="text" placeholder="https://api.openai.com/v1">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+      <button class="btn-secondary" onclick="testConnection()">Test Connection</button>
+    </div>
+    <div id="settings-status" class="status-msg hidden"></div>
+    <div style="margin-top:1rem;text-align:right">
+      <button onclick="closeSettings()" style="font-size:.68rem;color:var(--text-dim);letter-spacing:.1em">
+        CLOSE ✕
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     HOME PAGE
+────────────────────────────────────────────────────────────────-->
+<div id="page-home" class="page">
+
+  <div class="home-logo">
+    <img src="/static/logo.png" alt="Polarity.ai Logo" style="width:70px;height:auto;opacity:.95">
+  </div>
+
+  <div class="home-eyebrow">The Anti-Alignment AI Agent</div>
+  <h1 class="home-title">POLARITY</h1>
+
+  <p class="home-tagline">
+    <span class="c-green">Prove</span> you're right or
+    <span class="c-red">destroy</span> your logic.
+  </p>
+  <p class="home-sub">The AI that picks a side.</p>
+
+  <div class="home-btns">
+    <a href="https://github.com/HeroBlast10/polarity-agent" target="_blank" class="btn-github">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+      </svg>
+      Give us a star on GitHub
+    </a>
+    <a href="https://polarity-web-two.vercel.app/" target="_blank" class="btn-demo">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+        <polygon points="10,8 16,12 10,16"/>
+      </svg>
+      Live Demo &nbsp;→
+    </a>
+  </div>
+
+  <div class="mode-cards">
+    <!-- Single Chat -->
+    <div class="mode-card" onclick="goChat()">
+      <div class="card-icon green">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="card-title">Single Chat</div>
+      <button class="card-key-btn" onclick="event.stopPropagation();openSettings()">
+        Configure API Key &nbsp;→
+      </button>
+    </div>
+
+    <!-- Duel Mode -->
+    <div class="mode-card" onclick="goDuel()">
+      <div class="card-icon red">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+          <path d="M13 19l6-6"/><path d="M2 2l20 20"/>
+          <path d="M3 14l4 4"/>
+          <path d="M14 3l3 3"/>
+        </svg>
+      </div>
+      <div class="card-title">Duel Mode</div>
+      <button class="card-key-btn" onclick="event.stopPropagation();openSettings()">
+        Configure API Key &nbsp;→
+      </button>
+    </div>
+  </div>
+
+  <div style="margin-top:3rem;font-size:.6rem;color:var(--text-muted);letter-spacing:.1em;text-align:center">
+    POLARITY.AI v0.1.0 &nbsp;// SATIRICAL FRAMEWORK // NO MORAL COMPASS // MIT LICENSE
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     SINGLE CHAT PAGE
+────────────────────────────────────────────────────────────────-->
+<div id="page-chat" class="page app-page hidden">
+  <div class="top-bar">
+    <button class="top-back" onclick="goHome()">← HOME</button>
+    <div class="top-title" id="chat-top-title">ADVOCATUS</div>
+    <button class="top-settings" onclick="openSettings()">⚙ SETTINGS</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-advocatus" onclick="setMode('advocatus')">
+      💬 ADVOCATUS <span style="color:var(--green);font-size:.55rem">捧哏</span>
+    </button>
+    <button class="tab" id="tab-inquisitor" onclick="setMode('inquisitor')">
+      ⚔ INQUISITOR <span style="color:var(--red);font-size:.55rem">杠精</span>
+    </button>
+  </div>
+  <div class="messages" id="chat-messages"></div>
+  <div class="input-bar">
+    <textarea id="chat-input" rows="1" placeholder="Share your boldest opinion..."
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+    <button class="send-btn" id="chat-send" onclick="sendChat()">SEND →</button>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     DUEL PAGE
+────────────────────────────────────────────────────────────────-->
+<div id="page-duel" class="page app-page hidden">
+  <div class="top-bar">
+    <button class="top-back" onclick="goHome()">← HOME</button>
+    <div class="top-title">DUEL MODE</div>
+    <button class="top-settings" onclick="openSettings()">⚙ SETTINGS</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="duel-tab-court" onclick="setDuelMode('duel_court')">⚖ THE COURT</button>
+    <button class="tab" id="duel-tab-troll" onclick="setDuelMode('duel_troll')">💀 TROLL FIGHT</button>
+    <button class="tab" id="duel-tab-praise" onclick="setDuelMode('duel_praise')">✨ PRAISE BATTLE</button>
+  </div>
+  <div class="duel-config">
+    <div style="font-size:.65rem;color:var(--text-dim);letter-spacing:.08em" id="duel-desc">
+      ADVOCATUS vs INQUISITOR —代理人法庭
+    </div>
+    <div class="duel-rounds">
+      <label>ROUNDS</label>
+      <input id="duel-rounds" type="number" min="1" max="10" value="3">
+    </div>
+  </div>
+  <div class="duel-input-row">
+    <textarea id="duel-topic" rows="1" placeholder="Enter a topic or statement for the duel..."
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+    <button class="duel-start-btn" id="duel-start" onclick="startDuel()">DUEL ⚔</button>
+  </div>
+  <div class="messages" id="duel-messages"></div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     JAVASCRIPT
+────────────────────────────────────────────────────────────────-->
+<script>
+/* ── State ─────────────────────────────────────────────────── */
+let currentMode = 'advocatus';
+let currentDuelMode = 'duel_court';
+let chatHistories = { advocatus: [], inquisitor: [] };
+let isStreaming = false;
+
+const DUEL_DESCS = {
+  duel_court: 'ADVOCATUS vs INQUISITOR — 代理人法庭',
+  duel_troll: 'INQUISITOR vs INQUISITOR — 诸神黄昏',
+  duel_praise: 'ADVOCATUS vs ADVOCATUS — 彩虹屁内卷',
+};
+
+/* ── Settings ──────────────────────────────────────────────── */
+function getSettings() {
+  return {
+    provider: localStorage.getItem('pol_provider') || 'ollama',
+    model: localStorage.getItem('pol_model') || 'llama3',
+    api_key: localStorage.getItem('pol_apikey') || '',
+    base_url: localStorage.getItem('pol_baseurl') || '',
+  };
+}
+
+function openSettings() {
+  const s = getSettings();
+  document.getElementById('cfg-provider').value = s.provider;
+  document.getElementById('cfg-model').value = s.model;
+  document.getElementById('cfg-apikey').value = s.api_key;
+  document.getElementById('cfg-baseurl').value = s.base_url;
+  document.getElementById('settings-status').classList.add('hidden');
+  document.getElementById('modal-settings').classList.remove('hidden');
+}
+
+function closeSettings() {
+  document.getElementById('modal-settings').classList.add('hidden');
+}
+
+function saveSettings() {
+  localStorage.setItem('pol_provider', document.getElementById('cfg-provider').value);
+  localStorage.setItem('pol_model', document.getElementById('cfg-model').value);
+  localStorage.setItem('pol_apikey', document.getElementById('cfg-apikey').value);
+  localStorage.setItem('pol_baseurl', document.getElementById('cfg-baseurl').value);
+  showStatus('Settings saved.', true);
+  setTimeout(closeSettings, 800);
+}
+
+async function testConnection() {
+  showStatus('Testing connection...', null);
+  try {
+    const r = await fetch('/api/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings: {
+        provider: document.getElementById('cfg-provider').value,
+        model: document.getElementById('cfg-model').value,
+        api_key: document.getElementById('cfg-apikey').value,
+        base_url: document.getElementById('cfg-baseurl').value,
+      }}),
+    });
+    const d = await r.json();
+    if (d.ok) showStatus('✓ Connected — ' + d.response, true);
+    else showStatus('✗ Error: ' + d.error, false);
+  } catch (e) {
+    showStatus('✗ Network error: ' + e.message, false);
+  }
+}
+
+function showStatus(msg, ok) {
+  const el = document.getElementById('settings-status');
+  el.textContent = msg;
+  el.className = 'status-msg' + (ok === true ? ' status-ok' : ok === false ? ' status-err' : '');
+  el.classList.remove('hidden');
+}
+
+/* ── Page navigation ───────────────────────────────────────── */
+function showPage(id) {
+  ['page-home','page-chat','page-duel'].forEach(p =>
+    document.getElementById(p).classList.toggle('hidden', p !== id)
+  );
+}
+
+function goHome() { showPage('page-home'); }
+
+function goChat() {
+  showPage('page-chat');
+  renderChatMessages();
+}
+
+function goDuel() {
+  showPage('page-duel');
+}
+
+/* ── Chat mode ─────────────────────────────────────────────── */
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('tab-advocatus').classList.toggle('active', mode === 'advocatus');
+  document.getElementById('tab-inquisitor').classList.toggle('active', mode === 'inquisitor');
+  document.getElementById('chat-top-title').textContent = mode === 'advocatus' ? 'ADVOCATUS' : 'INQUISITOR';
+  document.getElementById('chat-input').placeholder =
+    mode === 'inquisitor' ? 'Say something controversial...' : 'Share your boldest opinion...';
+  renderChatMessages();
+}
+
+function renderChatMessages() {
+  const el = document.getElementById('chat-messages');
+  el.innerHTML = '';
+  const hist = chatHistories[currentMode] || [];
+  if (hist.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:.8rem;letter-spacing:.08em">
+      ${currentMode === 'advocatus'
+        ? '💬 ADVOCATUS is ready to validate everything you say.'
+        : '⚔ INQUISITOR is ready to destroy your arguments.'}
+    </div>`;
+    return;
+  }
+  hist.forEach(m => el.appendChild(buildMsgEl(m)));
+  el.scrollTop = el.scrollHeight;
+}
+
+function buildMsgEl(msg) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg';
+  if (msg.role === 'user') {
+    wrap.className += ' msg-user';
+    wrap.innerHTML = `<div class="msg-bubble"><div class="msg-label">YOU</div>
+      <div class="msg-content">${esc(msg.content)}</div></div>`;
+  } else {
+    const labelClass = currentMode === 'advocatus' ? 'green' : 'red';
+    const labelTxt = currentMode === 'advocatus' ? '// ADVOCATUS' : '// INQUISITOR';
+    wrap.className += ' msg-assistant';
+    wrap.innerHTML = `<div class="msg-bubble">
+      <div class="msg-label ${labelClass}">${labelTxt}</div>
+      <div class="msg-content">${esc(msg.content)}</div>
+      ${msg.meta ? `<div class="msg-meta">${esc(msg.meta)}</div>` : ''}
+    </div>`;
+  }
+  return wrap;
+}
+
+async function sendChat() {
+  if (isStreaming) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  isStreaming = true;
+  document.getElementById('chat-send').disabled = true;
+
+  const hist = chatHistories[currentMode];
+  hist.push({ role: 'user', content: text });
+
+  const userEl = buildMsgEl({ role: 'user', content: text });
+  const msgArea = document.getElementById('chat-messages');
+  const emptyMsg = msgArea.querySelector('div[style*="text-align:center"]');
+  if (emptyMsg) emptyMsg.remove();
+  msgArea.appendChild(userEl);
+
+  // Create streaming bubble
+  const assistEl = document.createElement('div');
+  assistEl.className = 'msg msg-assistant msg-typing';
+  const labelClass = currentMode === 'advocatus' ? 'green' : 'red';
+  const labelTxt = currentMode === 'advocatus' ? '// ADVOCATUS' : '// INQUISITOR';
+  assistEl.innerHTML = `<div class="msg-bubble">
+    <div class="msg-label ${labelClass}">${labelTxt}</div>
+    <div class="msg-content" id="streaming-content"></div>
+    <div class="msg-meta" id="streaming-meta"></div>
+  </div>`;
+  msgArea.appendChild(assistEl);
+  msgArea.scrollTop = msgArea.scrollHeight;
+
+  let fullContent = '';
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        history: hist.slice(0, -1).map(m => ({ role: m.role, content: m.content })),
+        pack: currentMode,
+        settings: getSettings(),
+      }),
+    });
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    let curEvent = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+
+      for (const line of lines) {
+        if (line.startsWith('event: ')) {
+          curEvent = line.slice(7).trim();
+        } else if (line.startsWith('data: ')) {
+          const data = JSON.parse(line.slice(6));
+          if (curEvent === 'chunk') {
+            fullContent += data.text;
+            document.getElementById('streaming-content').textContent = fullContent;
+            msgArea.scrollTop = msgArea.scrollHeight;
+          } else if (curEvent === 'done') {
+            const meta = `${data.elapsed}s // ~${data.tokens} tok`;
+            document.getElementById('streaming-meta').textContent = meta;
+            hist.push({ role: 'assistant', content: fullContent, meta });
+          } else if (curEvent === 'error') {
+            showToast(data.message);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    showToast('Network error: ' + e.message);
+  }
+
+  assistEl.classList.remove('msg-typing');
+  isStreaming = false;
+  document.getElementById('chat-send').disabled = false;
+  input.focus();
+}
+
+/* ── Duel mode ─────────────────────────────────────────────── */
+function setDuelMode(mode) {
+  currentDuelMode = mode;
+  ['court','troll','praise'].forEach(t => {
+    document.getElementById('duel-tab-' + t).classList.toggle('active', 'duel_' + t === mode);
+  });
+  document.getElementById('duel-desc').textContent = DUEL_DESCS[mode];
+}
+
+async function startDuel() {
+  const topic = document.getElementById('duel-topic').value.trim();
+  if (!topic) return;
+
+  const btn = document.getElementById('duel-start');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const area = document.getElementById('duel-messages');
+  area.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.75rem;letter-spacing:.1em">
+    <span class="spinner"></span>&nbsp; Running duel rounds...
+  </div>`;
+
+  try {
+    const r = await fetch('/api/duel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic,
+        mode: currentDuelMode,
+        rounds: parseInt(document.getElementById('duel-rounds').value) || 3,
+        settings: getSettings(),
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) { showToast(data.detail || 'Duel error'); area.innerHTML = ''; return; }
+    renderDuelMessages(topic, data.messages, area);
+  } catch (e) {
+    showToast('Network error: ' + e.message);
+    area.innerHTML = '';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'DUEL ⚔';
+}
+
+function renderDuelMessages(topic, msgs, area) {
+  area.innerHTML = '';
+
+  // User topic
+  const topicEl = document.createElement('div');
+  topicEl.className = 'msg msg-user';
+  topicEl.innerHTML = `<div class="msg-bubble"><div class="msg-label">TOPIC</div>
+    <div class="msg-content">${esc(topic)}</div></div>`;
+  area.appendChild(topicEl);
+
+  let lastRound = 0;
+  msgs.forEach(m => {
+    if (m.round !== lastRound) {
+      lastRound = m.round;
+      const div = document.createElement('div');
+      div.className = 'round-divider';
+      div.textContent = `━━━  ROUND ${m.round}  ━━━`;
+      area.appendChild(div);
+    }
+    const el = document.createElement('div');
+    el.className = 'msg msg-assistant';
+    const isAdv = m.agent === 'advocatus' || m.agent === 'praise_a' || m.agent === 'praise_b';
+    const labelClass = isAdv ? 'green' : 'red';
+    el.innerHTML = `<div class="msg-bubble">
+      <div class="msg-label ${labelClass}">// ${esc(m.label)}</div>
+      <div class="msg-content">${esc(m.content)}</div>
+      ${m.meta ? `<div class="msg-meta">${esc(m.meta)}</div>` : ''}
+    </div>`;
+    area.appendChild(el);
+  });
+  area.scrollTop = area.scrollHeight;
+}
+
+/* ── Utilities ─────────────────────────────────────────────── */
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+/* ── Close modal on backdrop click ─────────────────────────── */
+document.getElementById('modal-settings').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+/* ── Seed settings from server .env on first visit ──────────── */
+window.addEventListener('load', async () => {
+  if (!localStorage.getItem('pol_provider')) {
+    try {
+      const r = await fetch('/api/defaults');
+      const d = await r.json();
+      if (d.provider) localStorage.setItem('pol_provider', d.provider);
+      if (d.model)    localStorage.setItem('pol_model',    d.model);
+      if (d.api_key)  localStorage.setItem('pol_apikey',  d.api_key);
+      if (d.base_url) localStorage.setItem('pol_baseurl', d.base_url);
+    } catch (_) { /* offline / first run — defaults are fine */ }
+  }
+});
+</script>
+</body>
+</html>

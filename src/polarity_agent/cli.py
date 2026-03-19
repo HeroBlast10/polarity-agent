@@ -244,20 +244,18 @@ def duel(
 @app.command()
 def serve(
     host: str = typer.Option("0.0.0.0", "--host", help="Bind host."),
-    port: int = typer.Option(8501, "--port", help="Bind port."),
+    port: int = typer.Option(7860, "--port", help="Bind port."),
 ) -> None:
-    """Launch the Streamlit web UI."""
-    import subprocess
-    import sys
-
+    """Launch the web UI (FastAPI + Vanilla HTML/JS)."""
     try:
-        import streamlit  # noqa: F401
+        import uvicorn  # noqa: F401
     except ImportError:
         console.print("[red]Web dependencies not installed.[/]")
         console.print("Run: [bold]pip install polarity-agent\\[web][/]")
         raise typer.Exit(1) from None
 
-    web_path = Path(__file__).resolve().parent / "web.py"
+    from polarity_agent.server import main as server_main
+
     console.print(
         Panel(
             f"Launching Polarity Agent Web UI\nhttp://{host}:{port}",
@@ -265,18 +263,7 @@ def serve(
             border_style="cyan",
         )
     )
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "streamlit",
-            "run",
-            str(web_path),
-            f"--server.address={host}",
-            f"--server.port={port}",
-        ],
-        check=False,
-    )
+    server_main(host=host, port=port)
 
 
 @install_app.command("pack")

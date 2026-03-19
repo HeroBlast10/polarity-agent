@@ -125,8 +125,8 @@ POLARITY_PACK=advocatus
 
 ```bash
 polarity serve
-# 打开浏览器访问 http://localhost:8501
-# 在左侧侧边栏填写 Provider / Model / API Key 即可开始
+# 打开浏览器访问 http://localhost:7860
+# 点击 Settings 填写 Provider / Model / API Key 即可开始
 ```
 
 **命令行 Chat**
@@ -164,7 +164,7 @@ polarity duel --mode praise-battle --topic "我应该加薪" --rounds 3
 # 安装 web 依赖
 pip install -e ".[web,ollama]"
 
-# 在 http://localhost:8501 启动 Streamlit UI
+# 在 http://localhost:7860 启动 Web UI（FastAPI + Vanilla HTML/JS）
 polarity serve
 ```
 
@@ -202,7 +202,7 @@ vercel
 
 ```bash
 docker build -t polarity-agent .
-docker run -p 8501:8501 polarity-agent
+docker run -p 7860:7860 polarity-agent
 ```
 
 ## 架构
@@ -213,7 +213,7 @@ polarity-agent/
 │   ├── agent.py              # 核心引擎 — 立场锁定的有状态对话
 │   ├── cli.py                # Typer + Rich CLI（polarity 命令）
 │   ├── api.py                # FastAPI 后端（/chat、/stream、/packs）
-│   ├── web.py                # Streamlit 前端，赛博朋克风格
+│   ├── server.py             # FastAPI + Vanilla HTML/JS Web UI
 │   ├── tracing.py            # JSONL 追踪日志，用于会话回放
 │   ├── providers/
 │   │   ├── base.py           # 抽象 BaseProvider 接口
@@ -231,7 +231,7 @@ polarity-agent/
 │   ├── test_agent.py
 │   ├── test_tracing.py
 │   └── ...                   # 共 87 条测试，0 失败
-├── app.py                    # Streamlit 启动器
+├── app.py                    # Web UI 启动器
 ├── Dockerfile
 ├── AUP.md                    # "这是笑话机器，不是武器"
 └── pyproject.toml
