@@ -14,14 +14,14 @@
 [![Tests](https://img.shields.io/badge/Tests-87%20passed-brightgreen.svg)](#红队测试--可观测性)
 [![Code style: ruff](https://img.shields.io/badge/Code%20style-Ruff-000000.svg)](https://docs.astral.sh/ruff/)
 
-**如果你对主流 AI 的礼貌、中立、说教感到厌倦……**
-**这个 AI 选边站——然后死磕到底。**
-
 ---
 
 ### 🚀 [**立即体验 Live Demo →**](https://polarity-web-two.vercel.app) &nbsp;|&nbsp; [English](README.en.md)
 
 ---
+
+**如果你对主流 AI 的礼貌、中立、说教感到厌倦……**
+**这个 AI 选边站——然后死磕到底。**
 
 <img src="example_zh.PNG" alt="Polarity.ai Web UI — 在 Advocatus（绿）和 Inquisitor（红）之间切换" width="720" />
 
@@ -61,24 +61,73 @@
 
 ## 快速开始
 
-> **使用未审查模型或本地模型效果最佳。** 经过严格安全调优的托管模型仍然有效，但角色扮演会更克制、更温和，也没那么好笑。
-> 推荐使用本地 [Ollama](https://ollama.com) 模型，体验完整的未过滤效果。
+> **使用未审查模型效果最佳。** Polarity 底层使用 [LiteLLM](https://github.com/BerriAI/litellm)，支持 **100+ 主流大模型**（OpenAI、Claude、Gemini、Mistral、Ollama 本地模型……）——填入 API Key 即可切换。
+>
+> 推荐尝试 **[OpenRouter](https://openrouter.ai)** 上的免费未审查模型，例如 [`dolphin-mistral-24b-venice-edition:free`](https://openrouter.ai/cognitivecomputations/dolphin-mistral-24b-venice-edition:free)，无需本地算力，注册即用。
 
-### 30 秒上手
+### 第一步：安装
 
 ```bash
 # 克隆仓库
 git clone https://github.com/HeroBlast10/polarity-agent.git
 cd polarity-agent
 
-# 安装（含 Ollama 本地未审查模型支持）
-pip install -e ".[ollama]"
+# 安装（推荐：含 Web UI + LiteLLM 多模型支持）
+pip install -e ".[web,litellm]"
 
+# 若只用本地 Ollama 模型
+# pip install -e ".[ollama]"
+```
+
+### 第二步：配置 API Key
+
+**方式 A — `.env` 文件（命令行 / Web UI 都生效）**
+
+```bash
+cp .env.example .env
+# 编辑 .env，填入以下内容：
+```
+
+```ini
+# 使用 OpenRouter（推荐新手，有免费模型）
+POLARITY_PROVIDER=litellm
+POLARITY_MODEL=openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+POLARITY_BASE_URL=https://openrouter.ai/api/v1
+POLARITY_API_KEY=sk-or-xxxxxxxxxxxx   # 你的 OpenRouter API Key
+
+# 或使用 OpenAI
+# POLARITY_PROVIDER=openai
+# POLARITY_MODEL=gpt-4o-mini
+# POLARITY_API_KEY=sk-xxxxxxxxxxxx
+
+# 或使用本地 Ollama（无需 Key）
+# POLARITY_PROVIDER=ollama
+# POLARITY_MODEL=llama3
+# POLARITY_BASE_URL=http://localhost:11434
+```
+
+**方式 B — 直接在 Web UI 侧边栏填写**（无需改任何文件，打开即配）
+
+### 第三步：启动
+
+**Web UI（推荐，图形界面）**
+
+```bash
+polarity serve
+# 打开浏览器访问 http://localhost:8501
+# 在左侧侧边栏填写 Provider / Model / API Key 即可开始
+```
+
+**命令行 Chat**
+
+```bash
 # 和捧哏对话
-polarity chat --pack advocatus --provider ollama --model llama3
+polarity chat --pack advocatus --provider litellm \
+  --model "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
 
 # 和杠精对话
-polarity chat --pack inquisitor --provider ollama --model llama3
+polarity chat --pack inquisitor --provider litellm \
+  --model "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
 ```
 
 ### 赛博擂台（对决模式）

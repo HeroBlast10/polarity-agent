@@ -197,6 +197,27 @@ section.main .block-container {
     text-transform: uppercase;
 }
 
+/* ── Header links ───────────────────────────── */
+.header-links {
+    margin-top: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+.header-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.header-links a:hover {
+    color: #fff;
+}
+.header-sep {
+    color: var(--text-dim);
+    margin: 0 0.6rem;
+}
+
 /* ── Disclaimer ─────────────────────────────── */
 .disclaimer-bar {
     text-align: center;
@@ -629,6 +650,11 @@ st.html('''
 <div class="cyber-header">
     <h1>POLARITY</h1>
     <div class="tagline">THE ANTI-ALIGNMENT AGENT FRAMEWORK // 一念捧哏，一念杠精</div>
+    <div class="header-links">
+        <a href="https://github.com/HeroBlast10/polarity-agent" target="_blank">GitHub</a>
+        <span class="header-sep">//</span>
+        <a href="https://polarity-web-two.vercel.app/" target="_blank">Live Demo</a>
+    </div>
 </div>
 ''')
 

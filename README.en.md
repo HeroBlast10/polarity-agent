@@ -60,24 +60,73 @@ The world needs an AI that says:
 
 ## Quick Start
 
-> **Best results with uncensored or local models.** Heavily safety-tuned models stay in character but produce softer, less committed responses.
-> We recommend running a local [Ollama](https://ollama.com) model for the full experience.
+> **Best results with uncensored models.** Polarity is powered by [LiteLLM](https://github.com/BerriAI/litellm) under the hood, which means it supports **100+ mainstream LLMs** out of the box — OpenAI, Claude, Gemini, Mistral, local Ollama models, and more. Just plug in an API Key and go.
+>
+> We recommend trying a **free uncensored model on [OpenRouter](https://openrouter.ai)**, such as [`dolphin-mistral-24b-venice-edition:free`](https://openrouter.ai/cognitivecomputations/dolphin-mistral-24b-venice-edition:free) — no local GPU required, sign up and use instantly.
 
-### 30-Second Setup
+### Step 1: Install
 
 ```bash
 # Clone
 git clone https://github.com/HeroBlast10/polarity-agent.git
 cd polarity-agent
 
-# Install (with Ollama support for local uncensored models)
-pip install -e ".[ollama]"
+# Install (recommended: Web UI + LiteLLM multi-model support)
+pip install -e ".[web,litellm]"
 
+# If you prefer local Ollama only:
+# pip install -e ".[ollama]"
+```
+
+### Step 2: Configure your API Key
+
+**Option A — `.env` file (works for both CLI and Web UI)**
+
+```bash
+cp .env.example .env
+# Edit .env with your preferred provider:
+```
+
+```ini
+# Using OpenRouter (recommended for beginners — free models available)
+POLARITY_PROVIDER=litellm
+POLARITY_MODEL=openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+POLARITY_BASE_URL=https://openrouter.ai/api/v1
+POLARITY_API_KEY=sk-or-xxxxxxxxxxxx   # your OpenRouter API Key
+
+# Or OpenAI
+# POLARITY_PROVIDER=openai
+# POLARITY_MODEL=gpt-4o-mini
+# POLARITY_API_KEY=sk-xxxxxxxxxxxx
+
+# Or local Ollama (no key required)
+# POLARITY_PROVIDER=ollama
+# POLARITY_MODEL=llama3
+# POLARITY_BASE_URL=http://localhost:11434
+```
+
+**Option B — Fill in the Web UI sidebar directly** (no file editing required — just open and configure)
+
+### Step 3: Run
+
+**Web UI (recommended)**
+
+```bash
+polarity serve
+# Open http://localhost:8501 in your browser
+# Set Provider / Model / API Key in the left sidebar and start chatting
+```
+
+**CLI Chat**
+
+```bash
 # Chat with the Yes-Man
-polarity chat --pack advocatus --provider ollama --model llama3
+polarity chat --pack advocatus --provider litellm \
+  --model "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
 
 # Chat with the Troll
-polarity chat --pack inquisitor --provider ollama --model llama3
+polarity chat --pack inquisitor --provider litellm \
+  --model "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free"
 ```
 
 ### The Cyber Arena (Duel Mode)
