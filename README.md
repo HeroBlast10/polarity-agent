@@ -89,16 +89,25 @@ cp .env.example .env
 ```
 
 ```ini
-# 使用 OpenRouter（推荐新手，有免费模型）
+# 使用 DeepSeek（方式 1：通过 LiteLLM 连接 OpenAI 兼容接口）
 POLARITY_PROVIDER=litellm
-POLARITY_MODEL=openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free
-POLARITY_BASE_URL=https://openrouter.ai/api/v1
-POLARITY_API_KEY=sk-or-xxxxxxxxxxxx   # 你的 OpenRouter API Key
+POLARITY_MODEL=deepseek/deepseek-chat
+POLARITY_BASE_URL=https://api.deepseek.com
+POLARITY_API_KEY=sk-你的deepseekkey
+POLARITY_PACK=advocatus
 
-# 或使用 OpenAI
-# POLARITY_PROVIDER=openai
-# POLARITY_MODEL=gpt-4o-mini
-# POLARITY_API_KEY=sk-xxxxxxxxxxxx
+# 使用 DeepSeek（方式 2：使用 OpenAI provider 直连 DeepSeek 的 OpenAI 兼容接口）
+POLARITY_PROVIDER=openai
+POLARITY_MODEL=deepseek-chat
+POLARITY_BASE_URL=https://api.deepseek.com
+POLARITY_API_KEY=sk-你的deepseekkey
+POLARITY_PACK=advocatus
+
+# 备注：OpenRouter 上有一些未审查/免费模型可玩（推荐新手尝鲜）
+# POLARITY_PROVIDER=litellm
+# POLARITY_MODEL=openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+# POLARITY_BASE_URL=https://openrouter.ai/api/v1
+# POLARITY_API_KEY=sk-or-xxxxxxxxxxxx   # 你的 OpenRouter API Key
 
 # 或使用本地 Ollama（无需 Key）
 # POLARITY_PROVIDER=ollama

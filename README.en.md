@@ -88,16 +88,25 @@ cp .env.example .env
 ```
 
 ```ini
-# Using OpenRouter (recommended for beginners — free models available)
+# DeepSeek (Option 1: via LiteLLM to the OpenAI-compatible API)
 POLARITY_PROVIDER=litellm
-POLARITY_MODEL=openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free
-POLARITY_BASE_URL=https://openrouter.ai/api/v1
-POLARITY_API_KEY=sk-or-xxxxxxxxxxxx   # your OpenRouter API Key
+POLARITY_MODEL=deepseek/deepseek-chat
+POLARITY_BASE_URL=https://api.deepseek.com
+POLARITY_API_KEY=sk-your-deepseek-key
+POLARITY_PACK=advocatus
 
-# Or OpenAI
-# POLARITY_PROVIDER=openai
-# POLARITY_MODEL=gpt-4o-mini
-# POLARITY_API_KEY=sk-xxxxxxxxxxxx
+# DeepSeek (Option 2: use the OpenAI provider with DeepSeek base URL)
+POLARITY_PROVIDER=openai
+POLARITY_MODEL=deepseek-chat
+POLARITY_BASE_URL=https://api.deepseek.com
+POLARITY_API_KEY=sk-your-deepseek-key
+POLARITY_PACK=advocatus
+
+# Note: OpenRouter has some uncensored/free models (nice for quick trials)
+# POLARITY_PROVIDER=litellm
+# POLARITY_MODEL=openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+# POLARITY_BASE_URL=https://openrouter.ai/api/v1
+# POLARITY_API_KEY=sk-or-xxxxxxxxxxxx   # your OpenRouter API Key
 
 # Or local Ollama (no key required)
 # POLARITY_PROVIDER=ollama
