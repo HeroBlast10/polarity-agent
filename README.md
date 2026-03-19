@@ -89,14 +89,14 @@ cp .env.example .env
 ```
 
 ```ini
-# 使用 DeepSeek（方式 1：通过 LiteLLM 连接 OpenAI 兼容接口）
+# 方式 1：通过 LiteLLM 连接 OpenAI 兼容接口 (以 DeepSeek 为例)
 POLARITY_PROVIDER=litellm
 POLARITY_MODEL=deepseek/deepseek-chat
 POLARITY_BASE_URL=https://api.deepseek.com
 POLARITY_API_KEY=sk-你的deepseekkey
 POLARITY_PACK=advocatus
 
-# 使用 DeepSeek（方式 2：使用 OpenAI provider 直连 DeepSeek 的 OpenAI 兼容接口）
+# 方式 2：使用 OpenAI provider 直连 OpenAI 兼容接口 (以 DeepSeek 为例)
 POLARITY_PROVIDER=openai
 POLARITY_MODEL=deepseek-chat
 POLARITY_BASE_URL=https://api.deepseek.com

@@ -88,14 +88,14 @@ cp .env.example .env
 ```
 
 ```ini
-# DeepSeek (Option 1: via LiteLLM to the OpenAI-compatible API)
+# Option 1: via LiteLLM to the OpenAI-compatible API (Use DeepSeek as an example)
 POLARITY_PROVIDER=litellm
 POLARITY_MODEL=deepseek/deepseek-chat
 POLARITY_BASE_URL=https://api.deepseek.com
 POLARITY_API_KEY=sk-your-deepseek-key
 POLARITY_PACK=advocatus
 
-# DeepSeek (Option 2: use the OpenAI provider with DeepSeek base URL)
+# Option 2: use the OpenAI provider with DeepSeek base URL (Use DeepSeek as an example)
 POLARITY_PROVIDER=openai
 POLARITY_MODEL=deepseek-chat
 POLARITY_BASE_URL=https://api.deepseek.com
