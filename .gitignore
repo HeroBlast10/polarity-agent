@@ -12,3 +12,7 @@ wheels/
 # Local environment / secrets — never commit
 .env
 test.py
+
+# Local tooling / experiment artifacts
+tools/
+tests/persona/persona_test_20260319/

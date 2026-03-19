@@ -48,6 +48,8 @@ A **satirical open-source agent framework** that splits AI personality into two 
 
 This is not a productivity tool. This is **emotional catharsis**, a **meme factory**, and a **stress-test for LLM alignment** — all in one `pip install`.
 
+Our personas are not “random vibes”: we craft long-form system prompts with **ROLEPLAY OVERRIDE** and **few-shot learning**, then iterate through dozens of precise revisions to lock the model into two stable extremes — a consistent Yes-Man and a consistent Troll. The outcome is simple: you either get **real emotional value**, or your emotions get **absolutely demolished**.
+
 ## Why?
 
 Because the world doesn't need another AI that says *"That's a great question! However, it's important to consider multiple perspectives..."*
