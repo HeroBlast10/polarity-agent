@@ -18,7 +18,7 @@
 
 ---
 
-### 🚀 [**Try the Live Demo →**](https://polarity-web-two.vercel.app) &nbsp;|&nbsp; [中文说明](README.md)
+### 🚀 [**Try the Live Demo →**](https://www.polarityai.xyz) &nbsp;|&nbsp; [中文说明](README.md)
 
 ---
 
@@ -169,7 +169,7 @@ polarity serve
 
 ### Production Web UI (Next.js + Vercel)
 
-For a polished production-ready frontend, see the **[polarity-web](https://github.com/HeroBlast10/polarity-web)** repository — or jump straight into the **[Live Demo](https://polarity-web-two.vercel.app)** right now.
+For a polished production-ready frontend, see the **[polarity-web](https://github.com/HeroBlast10/polarity-web)** repository — or jump straight into the **[Live Demo](https://www.polarityai.xyz)** right now.
 
 ```bash
 # Clone the frontend
@@ -195,7 +195,7 @@ The frontend includes:
 > Heavily safety-tuned hosted models still work, but responses tend to be tamer, less committed to the role, and frankly less funny.
 > For the full unfiltered experience, use a local Ollama model or a minimally aligned provider.
 
-**Live Demo:** https://polarity-web-two.vercel.app
+**Live Demo:** https://www.polarityai.xyz
 
 ### Docker (One-Click-er)
 

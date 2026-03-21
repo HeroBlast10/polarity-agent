@@ -16,7 +16,7 @@
 
 ---
 
-### 🚀 [**立即体验 Live Demo →**](https://polarity-web-two.vercel.app) &nbsp;|&nbsp; [English](README.en.md)
+### 🚀 [**立即体验 Live Demo →**](https://www.polarityai.xyz) &nbsp;|&nbsp; [English](README.en.md)
 
 ---
 
@@ -170,7 +170,7 @@ polarity serve
 
 ### 生产级 Web UI（Next.js + Vercel）
 
-如需精美的生产前端，请查看独立的 **[polarity-web](https://github.com/HeroBlast10/polarity-web)** 项目——或直接打开 **[Live Demo](https://polarity-web-two.vercel.app)** 立即体验。
+如需精美的生产前端，请查看独立的 **[polarity-web](https://github.com/HeroBlast10/polarity-web)** 项目——或直接打开 **[Live Demo](https://www.polarityai.xyz)** 立即体验。
 
 ```bash
 # 克隆前端
@@ -196,7 +196,7 @@ vercel
 > 本地 Ollama 模型通常能产出最犀利、过滤最少的辩论内容。
 > 经过严格安全调优的托管模型仍然可用，但输出往往更温和，角色坚守度也偏低。
 
-**Live Demo：** https://polarity-web-two.vercel.app
+**Live Demo：** https://www.polarityai.xyz
 
 ### Docker（更懒的一键方式）
 
